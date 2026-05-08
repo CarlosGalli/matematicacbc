@@ -673,7 +673,9 @@ function selectExercise(id, unitNum) {
   area.style.display = 'flex';
 
   // Fill exercise info
-  document.getElementById('exType').textContent = ex.type || '';
+  const typeEl = document.getElementById('exType');
+  typeEl.innerHTML = (ex.type || '').replace(/\n/g, '<br>');
+  renderMath(typeEl);
   const lvlEl = document.getElementById('exLvl');
   lvlEl.textContent = ex.lvl || '';
   lvlEl.className = 'ex-lvl lv' + ex.lv;

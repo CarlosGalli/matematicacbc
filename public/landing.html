@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MatemáticaCBC — Aprobá Matemática CBC en el primer intento | Tutor IA 24hs</title>
+<meta name="description" content="Tutor de Inteligencia Artificial para Matemática CBC-UBA. Ejercicios resueltos paso a paso de las 6 unidades. Disponible 24hs. Probalo gratis.">
+<meta name="keywords" content="matemática CBC, matemática UBA, tutor IA matemática, límites derivadas integrales CBC, primer parcial matemática">
+<meta property="og:title" content="MatemáticaCBC — Aprobá en el primer intento">
+<meta property="og:description" content="Tutor de IA que te guía paso a paso en Matemática CBC. 6 unidades completas. Disponible 24hs.">
+<!-- GA4_TAG -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --negro:#0a0a0f;--casi-negro:#111118;--panel:#16161f;--borde:#252535;
+  --azul:#3d6bff;--azul-claro:#6b8fff;
+  --naranja:#ff8c00;--naranja-claro:#ffab40;--naranja-oscuro:#e07800;
+  --texto:#e8e8f0;--texto-suave:#9090aa;--texto-muy-suave:#55556a;--blanco:#ffffff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--negro);color:var(--texto);font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.6;overflow-x:hidden;}
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(255,140,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,140,0,.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+.bg-glow{position:fixed;width:600px;height:600px;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;}
+.bg-glow-1{background:rgba(61,107,255,.1);top:-200px;left:-200px;animation:floatGlow1 8s ease-in-out infinite;}
+.bg-glow-2{background:rgba(255,140,0,.07);bottom:-200px;right:-200px;animation:floatGlow2 10s ease-in-out infinite;}
+@keyframes floatGlow1{0%,100%{transform:translate(0,0);}50%{transform:translate(60px,40px);}}
+@keyframes floatGlow2{0%,100%{transform:translate(0,0);}50%{transform:translate(-40px,-60px);}}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 40px;background:rgba(10,10,15,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--borde);}
+.nav-logo{display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--blanco);}
+.nav-logo .sym{width:32px;height:32px;background:linear-gradient(135deg,var(--naranja),var(--naranja-claro));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#000;}
+.nav-links{display:flex;align-items:center;gap:24px;}
+.nav-links a{color:var(--texto-suave);font-size:14px;font-weight:500;transition:.2s;}
+.nav-links a:hover{color:var(--texto);}
+.btn-nav{background:var(--naranja);color:#000;padding:9px 22px;border-radius:8px;font-weight:700;font-size:14px;transition:.2s;}
+.btn-nav:hover{background:var(--naranja-oscuro);}
+main{position:relative;z-index:1;}
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:100px 20px 60px;text-align:center;}
+.hero-inner{max-width:780px;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 16px;background:rgba(255,140,0,.12);border:1px solid rgba(255,140,0,.3);border-radius:99px;font-size:13px;font-weight:600;color:var(--naranja);margin-bottom:28px;}
+.hero-badge .dot{width:6px;height:6px;background:var(--naranja);border-radius:50%;animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+h1{font-family:'Syne',sans-serif;font-size:clamp(2.4rem,5vw,4rem);font-weight:800;line-height:1.1;margin-bottom:20px;}
+h1 .highlight{color:var(--naranja);}
+.hero-sub{font-size:1.1rem;color:var(--texto-suave);max-width:560px;margin:0 auto 36px;}
+.hero-ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.btn-primary{background:var(--naranja);color:#000;padding:14px 32px;border-radius:10px;font-weight:700;font-size:15px;transition:.2s;}
+.btn-primary:hover{background:var(--naranja-oscuro);}
+.btn-secondary{background:rgba(255,255,255,.06);color:var(--texto);padding:14px 32px;border-radius:10px;font-weight:600;font-size:15px;border:1px solid var(--borde);transition:.2s;}
+.btn-secondary:hover{background:rgba(255,255,255,.1);}
+.hero-stats{display:flex;justify-content:center;gap:36px;margin-top:52px;flex-wrap:wrap;}
+.hero-stat{text-align:center;}
+.hero-stat .n{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--naranja);}
+.hero-stat .l{font-size:13px;color:var(--texto-suave);}
+/* PREVIEW */
+.preview-section{padding:60px 20px;text-align:center;}
+.preview-card{max-width:680px;margin:0 auto;background:var(--panel);border:1px solid var(--borde);border-radius:16px;overflow:hidden;}
+.preview-topbar{padding:12px 18px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--borde);display:flex;align-items:center;gap:8px;}
+.preview-dot{width:10px;height:10px;border-radius:50%;}
+.preview-body{display:flex;gap:0;}
+.preview-sidebar{width:200px;border-right:1px solid var(--borde);padding:12px;}
+.preview-sidebar-item{padding:8px 10px;border-radius:8px;font-size:12px;margin-bottom:4px;cursor:default;}
+.preview-sidebar-item.act{background:rgba(255,140,0,.15);color:var(--naranja);font-weight:600;}
+.preview-sidebar-item.norm{color:var(--texto-suave);}
+.preview-chat{flex:1;padding:16px;display:flex;flex-direction:column;gap:12px;min-height:200px;}
+.bubble{padding:10px 14px;border-radius:12px;font-size:12px;line-height:1.6;max-width:85%;text-align:left;}
+.bubble.ai{background:rgba(61,107,255,.12);border:1px solid rgba(61,107,255,.25);align-self:flex-start;}
+.bubble.usr{background:rgba(255,140,0,.1);border:1px solid rgba(255,140,0,.2);align-self:flex-end;}
+/* UNIDADES */
+.section{padding:80px 20px;}
+.section-title{text-align:center;font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;margin-bottom:10px;}
+.section-sub{text-align:center;color:var(--texto-suave);margin-bottom:44px;}
+.units-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;max-width:900px;margin:0 auto;}
+.unit-card{background:var(--panel);border:1px solid var(--borde);border-radius:12px;padding:22px;transition:.3s;}
+.unit-card:hover{border-color:var(--naranja);transform:translateY(-2px);}
+.unit-num{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--naranja);letter-spacing:.1em;margin-bottom:8px;}
+.unit-name{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:6px;}
+.unit-meta{font-size:13px;color:var(--texto-suave);}
+/* FEATURES */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;max-width:900px;margin:0 auto;}
+.feature-card{background:var(--panel);border:1px solid var(--borde);border-radius:12px;padding:24px;}
+.feature-icon{font-size:28px;margin-bottom:14px;}
+.feature-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px;}
+.feature-desc{font-size:14px;color:var(--texto-suave);}
+/* HOW IT WORKS */
+.how-grid{display:flex;gap:0;max-width:750px;margin:0 auto;position:relative;}
+.how-grid::before{content:'';position:absolute;top:28px;left:50px;right:50px;height:2px;background:linear-gradient(90deg,var(--naranja),var(--azul));opacity:.3;}
+.how-step{flex:1;text-align:center;padding:0 20px;}
+.how-num{width:56px;height:56px;background:linear-gradient(135deg,var(--naranja),var(--naranja-claro));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:#000;margin:0 auto 16px;}
+.how-title{font-weight:700;margin-bottom:6px;}
+.how-desc{font-size:13px;color:var(--texto-suave);}
+/* PRICING */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;max-width:860px;margin:0 auto;}
+.price-card{background:var(--panel);border:1px solid var(--borde);border-radius:16px;padding:28px;position:relative;}
+.price-card.popular{border-color:var(--naranja);box-shadow:0 0 40px rgba(255,140,0,.15);}
+.popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--naranja);color:#000;font-size:11px;font-weight:700;padding:4px 14px;border-radius:99px;}
+.price-plan{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--texto-suave);margin-bottom:12px;letter-spacing:.05em;}
+.price-amount{font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:800;margin-bottom:4px;}
+.price-amount .currency{font-size:1rem;vertical-align:top;margin-top:8px;display:inline-block;color:var(--texto-suave);}
+.price-period{font-size:13px;color:var(--texto-suave);margin-bottom:20px;}
+.price-features{list-style:none;margin-bottom:24px;}
+.price-features li{font-size:14px;padding:6px 0;color:var(--texto-suave);display:flex;align-items:center;gap:8px;}
+.price-features li .chk{color:var(--naranja);font-weight:700;}
+.btn-price{display:block;text-align:center;padding:13px;border-radius:10px;font-weight:700;font-size:14px;transition:.2s;}
+.btn-price-primary{background:var(--naranja);color:#000;}
+.btn-price-primary:hover{background:var(--naranja-oscuro);}
+.btn-price-secondary{background:rgba(255,255,255,.06);color:var(--texto);border:1px solid var(--borde);}
+.btn-price-secondary:hover{background:rgba(255,255,255,.1);}
+/* FAQ */
+.faq-list{max-width:680px;margin:0 auto;}
+.faq-item{border:1px solid var(--borde);border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.faq-q{padding:18px 20px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:.2s;}
+.faq-q:hover{background:rgba(255,255,255,.03);}
+.faq-a{padding:0 20px 18px;font-size:14px;color:var(--texto-suave);display:none;}
+.faq-a.open{display:block;}
+/* CTA */
+.cta-section{padding:80px 20px;text-align:center;}
+.cta-box{max-width:540px;margin:0 auto;background:var(--panel);border:1px solid rgba(255,140,0,.3);border-radius:20px;padding:48px 40px;}
+.cta-title{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;margin-bottom:14px;}
+.cta-sub{color:var(--texto-suave);margin-bottom:28px;}
+/* FOOTER */
+footer{border-top:1px solid var(--borde);padding:32px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:gap 20px;}
+footer .links{display:flex;gap:20px;}
+footer a{font-size:13px;color:var(--texto-suave);}
+footer a:hover{color:var(--texto);}
+footer .copy{font-size:13px;color:var(--texto-muy-suave);}
+@media(max-width:640px){
+  nav{padding:14px 20px;}
+  .nav-links .nav-links{display:none;}
+  .how-grid{flex-direction:column;gap:24px;}
+  .how-grid::before{display:none;}
+  footer{flex-direction:column;gap:12px;text-align:center;}
+}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+
+<nav>
+  <div class="nav-logo">
+    <div class="sym">∑</div>
+    MatemáticaCBC
+  </div>
+  <div class="nav-links">
+    <a href="#unidades">Unidades</a>
+    <a href="#precios">Precios</a>
+    <a href="#faq">FAQ</a>
+    <a href="/app" class="btn-nav">Ingresar →</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge"><span class="dot"></span> Tutor IA disponible 24hs</div>
+    <h1>Aprobá <span class="highlight">Matemática CBC</span><br>en el primer intento</h1>
+    <p class="hero-sub">Tutor de Inteligencia Artificial que te guía paso a paso en las 6 unidades del CBC-UBA. Sin darte las respuestas. Disponible las 24 horas.</p>
+    <div class="hero-ctas">
+      <a href="/app" class="btn-primary">Probarlo gratis →</a>
+      <a href="#unidades" class="btn-secondary">Ver unidades</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="n">6</div><div class="l">Unidades completas</div></div>
+      <div class="hero-stat"><div class="n">60+</div><div class="l">Ejercicios resueltos</div></div>
+      <div class="hero-stat"><div class="n">24hs</div><div class="l">Disponibilidad</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PREVIEW -->
+<section class="preview-section">
+  <div class="preview-card">
+    <div class="preview-topbar">
+      <div class="preview-dot" style="background:#f85149"></div>
+      <div class="preview-dot" style="background:#f0883e"></div>
+      <div class="preview-dot" style="background:#3fb950"></div>
+      <span style="margin-left:8px;font-size:11px;color:#8b949e">MatemáticaCBC — Tutor IA</span>
+    </div>
+    <div class="preview-body">
+      <div class="preview-sidebar">
+        <div style="font-size:10px;color:#8b949e;margin-bottom:8px;font-weight:700;letter-spacing:.05em">UNIDADES</div>
+        <div class="preview-sidebar-item norm">1 · Números reales</div>
+        <div class="preview-sidebar-item norm">2 · Funciones</div>
+        <div class="preview-sidebar-item norm">3 · Trigonometría</div>
+        <div class="preview-sidebar-item act">4 · Límites</div>
+        <div class="preview-sidebar-item norm">5 · Derivadas</div>
+        <div class="preview-sidebar-item norm">6 · Integrales</div>
+      </div>
+      <div class="preview-chat">
+        <div class="bubble ai">Bien, calculemos este límite. ¿Qué pasa si sustituís directamente x = 2 en la expresión? ¿Qué forma obtenés?</div>
+        <div class="bubble usr">Me da 0/0, eso es una indeterminación</div>
+        <div class="bubble ai">Exacto. Tenés una indeterminación 0/0. ¿Qué técnica algebraica conocés para levantarla cuando tenés un cociente de polinomios?</div>
+        <div class="bubble usr">¿Factorizar el numerador y el denominador?</div>
+        <div class="bubble ai">Perfecto. Intentá factorizar el numerador x² - 4. ¿Qué diferencia de cuadrados reconocés ahí?</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- UNIDADES -->
+<section class="section" id="unidades">
+  <h2 class="section-title">Las 6 unidades del CBC</h2>
+  <p class="section-sub">Ejercicios de todos los temas del programa oficial de Matemática CBC-UBA</p>
+  <div class="units-grid">
+    <div class="unit-card"><div class="unit-num">UNIDAD 1 · 1er Parcial</div><div class="unit-name">Números reales y álgebra</div><div class="unit-meta">Valor absoluto · inecuaciones · polinomios · radicales</div></div>
+    <div class="unit-card"><div class="unit-num">UNIDAD 2 · 1er Parcial</div><div class="unit-name">Funciones</div><div class="unit-meta">Dominio · imagen · composición · función inversa</div></div>
+    <div class="unit-card"><div class="unit-num">UNIDAD 3 · 1er Parcial</div><div class="unit-name">Trigonometría</div><div class="unit-meta">Círculo trigonométrico · identidades · ecuaciones trig</div></div>
+    <div class="unit-card"><div class="unit-num">UNIDAD 4 · 2do Parcial</div><div class="unit-name">Límites y continuidad</div><div class="unit-meta">Indeterminaciones · límites laterales · continuidad</div></div>
+    <div class="unit-card"><div class="unit-num">UNIDAD 5 · 2do Parcial</div><div class="unit-name">Derivadas</div><div class="unit-meta">Regla de la cadena · máximos · L'Hôpital</div></div>
+    <div class="unit-card"><div class="unit-num">UNIDAD 6 · 2do Parcial</div><div class="unit-name">Integrales</div><div class="unit-meta">Primitivas · sustitución · integración por partes · TFC</div></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" style="padding-top:0">
+  <h2 class="section-title">¿Por qué MatemáticaCBC?</h2>
+  <p class="section-sub">No memorizás fórmulas. Aprendés a pensar matemáticamente.</p>
+  <div class="features-grid">
+    <div class="feature-card"><div class="feature-icon">🧠</div><div class="feature-title">No te da las respuestas</div><div class="feature-desc">El tutor IA te hace preguntas para que llegues vos a la solución. Igual que un buen profesor.</div></div>
+    <div class="feature-card"><div class="feature-icon">📐</div><div class="feature-title">Ejercicios con LaTeX</div><div class="feature-desc">Todas las fórmulas se muestran con notación matemática correcta. Igual que en el parcial.</div></div>
+    <div class="feature-card"><div class="feature-icon">🎯</div><div class="feature-title">Por nivel de dificultad</div><div class="feature-desc">Ejercicios clasificados en 3 niveles: básico, intermedio y avanzado para ir progresando.</div></div>
+    <div class="feature-card"><div class="feature-icon">⚡</div><div class="feature-title">Disponible 24hs</div><div class="feature-desc">No tenés que esperar al horario de consultas. El tutor está disponible cuando necesitás practicar.</div></div>
+    <div class="feature-card"><div class="feature-icon">📊</div><div class="feature-title">Seguimiento de progreso</div><div class="feature-desc">Ves cuántos ejercicios resolviste por unidad y cuánto tiempo practicaste.</div></div>
+    <div class="feature-card"><div class="feature-icon">✏️</div><div class="feature-title">Tu propio ejercicio</div><div class="feature-desc">En el plan Completo podés pegar cualquier ejercicio de tu guía y el tutor te ayuda. (Plan Completo)</div></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" style="padding-top:0">
+  <h2 class="section-title">¿Cómo funciona?</h2>
+  <p class="section-sub">Tres pasos para empezar a practicar hoy</p>
+  <div class="how-grid">
+    <div class="how-step"><div class="how-num">1</div><div class="how-title">Registrate gratis</div><div class="how-desc">Creá tu cuenta con email y contraseña. Sin tarjeta.</div></div>
+    <div class="how-step"><div class="how-num">2</div><div class="how-title">Elegí tu unidad</div><div class="how-desc">Seleccioná la unidad y el ejercicio que querés practicar.</div></div>
+    <div class="how-step"><div class="how-num">3</div><div class="how-title">Practicá con el tutor</div><div class="how-desc">El tutor IA te hace preguntas para guiarte al resultado.</div></div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="precios" style="background:rgba(255,255,255,.01)">
+  <h2 class="section-title">Planes</h2>
+  <p class="section-sub">Empezá gratis. Suscribite cuando estés listo/a.</p>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-plan">GRATIS</div>
+      <div class="price-amount">$0</div>
+      <div class="price-period">para siempre</div>
+      <ul class="price-features">
+        <li><span class="chk">✓</span> 3 consultas al tutor IA</li>
+        <li><span class="chk">✓</span> Acceso a todos los ejercicios</li>
+        <li><span class="chk">✓</span> Ver soluciones completas</li>
+      </ul>
+      <a href="/app" class="btn-price btn-price-secondary">Empezar gratis →</a>
+    </div>
+    <div class="price-card popular">
+      <div class="popular-badge">MÁS POPULAR</div>
+      <div class="price-plan">ESTÁNDAR</div>
+      <div class="price-amount"><span class="currency">$</span>15.990</div>
+      <div class="price-period">por 30 días</div>
+      <ul class="price-features">
+        <li><span class="chk">✓</span> Consultas ilimitadas al tutor</li>
+        <li><span class="chk">✓</span> Las 6 unidades completas</li>
+        <li><span class="chk">✓</span> Ver soluciones detalladas</li>
+        <li><span class="chk">✓</span> Seguimiento de progreso</li>
+      </ul>
+      <a href="/app" class="btn-price btn-price-primary">Suscribirse →</a>
+    </div>
+    <div class="price-card">
+      <div class="price-plan">COMPLETO</div>
+      <div class="price-amount"><span class="currency">$</span>25.990</div>
+      <div class="price-period">por 30 días</div>
+      <ul class="price-features">
+        <li><span class="chk">✓</span> Todo lo del plan Estándar</li>
+        <li><span class="chk">✓</span> Tutor libre: pegá cualquier ejercicio</li>
+        <li><span class="chk">✓</span> Prioridad en soporte</li>
+      </ul>
+      <a href="/app" class="btn-price btn-price-secondary">Suscribirse →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <h2 class="section-title">Preguntas frecuentes</h2>
+  <p class="section-sub">Todo lo que necesitás saber antes de empezar</p>
+  <div class="faq-list">
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">¿El tutor me da las respuestas directas? <span>+</span></div>
+      <div class="faq-a">No. El tutor está diseñado para guiarte mediante preguntas. Si cometés un error, te pregunta si querés que te indique cuál es o si preferís intentarlo de nuevo. Así realmente aprendés.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">¿Los ejercicios son del CBC-UBA? <span>+</span></div>
+      <div class="faq-a">Sí. Los ejercicios cubren las 6 unidades del programa oficial de Matemática CBC-UBA con ejemplos del tipo que aparece en los parciales.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">¿Cómo se ve la notación matemática? <span>+</span></div>
+      <div class="faq-a">Usamos KaTeX para renderizar las fórmulas, igual que en los libros de texto. Las ecuaciones con fracciones, raíces, integrales y límites se ven correctamente.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">¿Puedo cancelar cuando quiero? <span>+</span></div>
+      <div class="faq-a">Sí. No hay renovación automática. El plan dura 30 días y después volvés al plan gratis. Podés suscribirte nuevamente cuando quieras.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">¿Qué pasa con mis 3 consultas gratuitas? <span>+</span></div>
+      <div class="faq-a">Al registrarte tenés 3 consultas gratuitas para probar el tutor. Una vez usadas, podés seguir viendo los ejercicios y las soluciones, pero necesitás suscribirte para el tutor.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">¿Cómo funciona el "Tutor libre"? <span>+</span></div>
+      <div class="faq-a">En el plan Completo, podés pegar cualquier ejercicio de tu guía de estudios o parcial anterior y el tutor IA te ayuda a resolverlo paso a paso.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-section">
+  <div class="cta-box">
+    <div class="cta-title">Empezá hoy, gratis</div>
+    <p class="cta-sub">3 consultas gratuitas. Sin tarjeta de crédito. En 30 segundos.</p>
+    <a href="/app" class="btn-primary" style="display:inline-block">Crear cuenta gratis →</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="nav-logo" style="font-size:15px">
+    <div class="sym" style="width:26px;height:26px;font-size:14px">∑</div>
+    MatemáticaCBC
+  </div>
+  <div class="links">
+    <a href="/terminos">Términos</a>
+    <a href="/privacidad">Privacidad</a>
+  </div>
+  <div class="copy">© 2026 MatemáticaCBC</div>
+</footer>
+
+<!-- WA_BUTTON -->
+<!-- CONTACT_EMAIL_BTN -->
+
+<script>
+function toggleFaq(el) {
+  const a = el.nextElementSibling;
+  const open = a.classList.toggle('open');
+  el.querySelector('span').textContent = open ? '−' : '+';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MatemáticaCBC — Tutor IA</title>
+<!-- GA4_TAG -->
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="if(window._pendingKatex){window._pendingKatex.forEach(el=>renderMath(el));window._pendingKatex=[];}"></script>
+<style>
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#1c2128;
+  --border:#30363d;--border2:#21262d;
+  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+  --azul:#58a6ff;--azulDark:#1f6feb;
+  --naranja:#ff8c00;--naranjaDark:#b36200;
+  --verde:#3fb950;--rojo:#f85149;
+  --shadow:rgba(0,0,0,.5);
+  --bubble-ai-bg:rgba(31,111,235,0.12);--bubble-ai-border:rgba(88,166,255,0.25);
+  --bubble-usr-bg:#1c2128;--topbar-bg:rgba(13,17,23,0.92);
+}
+body.light{
+  --bg:#f0f4f8;--bg2:#fff;--bg3:#e8ecf0;
+  --border:#d0d7de;--border2:#c8cdd3;
+  --text:#1f2328;--text2:#57606a;--text3:#8c959f;
+  --azul:#0969da;--azulDark:#0550ae;
+  --naranja:#b36200;--naranjaDark:#7d4500;
+  --verde:#1a7f37;--rojo:#cf222e;
+  --bubble-ai-bg:rgba(9,105,218,0.07);--bubble-ai-border:rgba(9,105,218,0.2);
+  --bubble-usr-bg:#e8ecf0;--topbar-bg:rgba(240,244,248,.95);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .25s,color .25s;}
+body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear-gradient(var(--border2) 1px,transparent 1px),linear-gradient(90deg,var(--border2) 1px,transparent 1px);background-size:40px 40px;opacity:.3;pointer-events:none;}
+
+/* ── TOPBAR ── */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:50;height:52px;background:var(--topbar-bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;}
+.topbar-logo{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--naranja);white-space:nowrap;}
+.topbar-sep{width:1px;height:24px;background:var(--border);}
+.topbar-user{font-size:12px;color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.plan-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;font-family:'Space Mono',monospace;white-space:nowrap;}
+.plan-gratis{background:rgba(139,148,158,.15);color:var(--text2);}
+.plan-estandar{background:rgba(255,140,0,.15);color:var(--naranja);}
+.plan-completo{background:rgba(63,185,80,.15);color:var(--verde);}
+.topbar-btn{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:var(--bg3);color:var(--text2);transition:.2s;}
+.topbar-btn:hover{color:var(--text);}
+.theme-toggle{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:.2s;flex-shrink:0;}
+.theme-toggle:hover{border-color:var(--naranja);}
+
+/* ── LAYOUT ── */
+.layout{display:flex;height:100vh;padding-top:52px;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:260px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.sidebar-header{padding:14px 14px 8px;border-bottom:1px solid var(--border);}
+.sidebar-header h2{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;font-family:'Space Mono',monospace;}
+.unit-item{border-bottom:1px solid var(--border2);}
+.unit-toggle{width:100%;padding:10px 14px;background:none;border:none;color:var(--text);font-size:13px;font-weight:600;text-align:left;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:.15s;}
+.unit-toggle:hover{background:rgba(255,255,255,.04);}
+.unit-toggle.open{color:var(--naranja);}
+.unit-arrow{font-size:10px;transition:.2s;}
+.unit-toggle.open .unit-arrow{transform:rotate(90deg);}
+.unit-count{font-size:10px;color:var(--text3);font-family:'Space Mono',monospace;}
+.exercises-list{display:none;padding:4px 0;}
+.exercises-list.open{display:block;}
+.ex-item{padding:7px 14px 7px 24px;font-size:12px;color:var(--text2);cursor:pointer;transition:.15s;display:flex;align-items:center;gap:8px;border-radius:0;}
+.ex-item:hover{background:rgba(255,255,255,.04);color:var(--text);}
+.ex-item.active{background:rgba(255,140,0,.1);color:var(--naranja);}
+.lv-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.lv1 .lv-dot{background:#3fb950;}
+.lv2 .lv-dot{background:var(--naranja);}
+.lv3 .lv-dot{background:#f85149;}
+.sidebar-footer{padding:12px 14px;border-top:1px solid var(--border);margin-top:auto;}
+.upgrade-box{background:rgba(255,140,0,.08);border:1px solid rgba(255,140,0,.2);border-radius:8px;padding:12px;text-align:center;}
+.upgrade-box p{font-size:12px;color:var(--text2);margin-bottom:8px;}
+.btn-upgrade{display:block;background:var(--naranja);color:#000;border:none;border-radius:6px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;width:100%;transition:.2s;}
+.btn-upgrade:hover{background:var(--naranjaDark);}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+
+/* ── EXERCISE PANEL ── */
+.ex-panel{padding:16px 20px;border-bottom:1px solid var(--border);background:var(--bg2);}
+.ex-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.ex-type{font-family:'Space Mono',monospace;font-size:11px;color:var(--text3);}
+.ex-lvl{font-size:11px;padding:2px 8px;border-radius:99px;font-family:'Space Mono',monospace;font-weight:700;}
+.ex-lvl.lv1{background:rgba(63,185,80,.15);color:#3fb950;}
+.ex-lvl.lv2{background:rgba(255,140,0,.15);color:var(--naranja);}
+.ex-lvl.lv3{background:rgba(248,81,73,.15);color:#f85149;}
+.ex-text{font-size:14px;line-height:1.75;color:var(--text);}
+.ex-text .katex-display{margin:8px 0;}
+.prog-label{font-size:11px;color:var(--text3);font-family:'Space Mono',monospace;margin-bottom:4px;margin-top:10px;}
+.prog-steps{display:flex;gap:3px;margin-bottom:4px;}
+.ps{flex:1;height:4px;border-radius:2px;background:var(--border);transition:.3s;}
+.ps.done{background:var(--verde);}
+.ps.cur{background:var(--naranja);animation:pulse-bar 1.5s infinite;}
+@keyframes pulse-bar{0%,100%{opacity:1;}50%{opacity:.5;}}
+.btn-show-ans{margin-top:10px;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text2);transition:.2s;}
+.btn-show-ans:hover{border-color:var(--naranja);color:var(--naranja);}
+.ans-box{margin-top:8px;padding:10px 14px;background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.25);border-radius:8px;font-size:13px;display:none;overflow-x:auto;}
+.ans-box .katex-display{margin:4px 0;}
+/* Fix flex-column overflow: permite que exerciseArea se comprima a la altura asignada */
+#exerciseArea,#libreArea{min-height:0;}
+/* Limita el panel del enunciado para que el chat siempre sea visible */
+.ex-panel{overflow-y:auto;max-height:45vh;}
+/* Sidebar: reserva espacio para el scrollbar y usa scrollbar fino para no solapar */
+#unitsList{scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+#unitsList::-webkit-scrollbar{width:4px;}
+#unitsList::-webkit-scrollbar-track{background:transparent;}
+#unitsList::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.ans-box.show{display:block;}
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3);text-align:center;padding:40px;}
+.empty-state .sym{font-size:48px;margin-bottom:12px;opacity:.5;}
+.empty-state p{font-size:14px;}
+
+/* ── CHAT ── */
+.chat-area{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;}
+.bubble-wrap{display:flex;align-items:flex-end;gap:8px;animation:up .3s ease;}
+@keyframes up{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.bubble-wrap.ai{justify-content:flex-start;}
+.bubble-wrap.usr{justify-content:flex-end;}
+.bubble-avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.bubble-avatar.ai{background:linear-gradient(135deg,var(--naranjaDark),var(--naranja));color:#fff;font-weight:700;}
+.bubble-avatar.usr{background:var(--bg3);border:1px solid var(--border);font-size:10px;}
+.bubble{max-width:85%;padding:10px 14px;border-radius:14px;font-size:13.5px;line-height:1.7;position:relative;}
+.bubble.ai{background:var(--bubble-ai-bg);border:1px solid var(--bubble-ai-border);border-bottom-left-radius:4px;color:var(--text);}
+.bubble.ai.ok{background:rgba(63,185,80,.08);border-color:rgba(63,185,80,.25);}
+.bubble.ai.err{background:rgba(248,81,73,.08);border-color:rgba(248,81,73,.25);}
+.bubble.usr{background:var(--bubble-usr-bg);border:1px solid var(--border2);border-bottom-right-radius:4px;}
+.bubble .katex-display{margin:6px 0;}
+.typing{display:flex;gap:4px;padding:4px 2px;}
+.typing span{width:7px;height:7px;border-radius:50%;background:var(--text3);animation:blink .9s infinite;}
+.typing span:nth-child(2){animation-delay:.2s;}
+.typing span:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:.2;}40%{opacity:1;}}
+
+/* ── CHAT INPUT ── */
+.chat-footer{padding:12px 16px;border-top:1px solid var(--border);background:var(--bg2);}
+.chat-input-row{display:flex;gap:8px;align-items:flex-end;}
+.chat-input-wrap{flex:1;position:relative;}
+#chatInput{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 14px;font-size:14px;font-family:'DM Sans',sans-serif;resize:none;min-height:126px;max-height:360px;overflow-y:auto;transition:.2s;line-height:1.5;}
+#chatInput:focus{outline:none;border-color:var(--naranja);}
+#chatInput::placeholder{color:var(--text3);}
+.btn-send{background:var(--naranja);color:#000;border:none;border-radius:8px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;transition:.2s;}
+.btn-send:hover{background:var(--naranjaDark);}
+.btn-send:disabled{opacity:.4;cursor:not-allowed;}
+.chat-hint{font-size:11px;color:var(--text3);margin-top:6px;text-align:center;}
+
+/* ── TUTOR LIBRE ── */
+.tutor-libre-tab{position:relative;z-index:1;}
+.libre-panel{padding:16px 20px;background:var(--bg2);border-bottom:1px solid var(--border);}
+.libre-label{font-size:11px;color:var(--text3);font-family:'Space Mono',monospace;margin-bottom:6px;}
+#libreInput{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 12px;font-size:13px;font-family:'DM Sans',sans-serif;resize:none;min-height:70px;}
+#libreInput:focus{outline:none;border-color:var(--naranja);}
+.btn-libre-start{margin-top:8px;padding:8px 18px;background:var(--naranja);color:#000;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s;}
+.btn-libre-start:hover{background:var(--naranjaDark);}
+
+/* ── MODAL AUTH ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+.overlay.hidden{display:none;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:400px;position:relative;}
+.modal-title{font-size:20px;font-weight:700;margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--text2);margin-bottom:24px;}
+.modal-tabs{display:flex;gap:0;margin-bottom:24px;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.modal-tab{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;border:none;background:transparent;color:var(--text2);}
+.modal-tab.act{background:var(--naranja);color:#000;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;}
+.form-group input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 13px;font-size:14px;font-family:'DM Sans',sans-serif;transition:.2s;}
+.form-group input:focus{outline:none;border-color:var(--naranja);}
+.btn-submit{width:100%;background:var(--naranja);color:#000;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;transition:.2s;margin-top:4px;}
+.btn-submit:hover{background:var(--naranjaDark);}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed;}
+.modal-err{padding:10px 14px;background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);border-radius:8px;font-size:13px;color:#f85149;margin-bottom:14px;display:none;}
+.modal-ok{padding:10px 14px;background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.3);border-radius:8px;font-size:13px;color:#3fb950;margin-bottom:14px;display:none;}
+.modal-link{font-size:13px;color:var(--naranja);cursor:pointer;margin-top:12px;display:block;text-align:center;}
+
+/* ── UPGRADE MODAL ── */
+.upgrade-modal{max-width:440px;}
+.plan-option{border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;cursor:pointer;transition:.2s;}
+.plan-option:hover,.plan-option.sel{border-color:var(--naranja);background:rgba(255,140,0,.05);}
+.plan-option h3{font-size:15px;font-weight:700;margin-bottom:4px;}
+.plan-option p{font-size:13px;color:var(--text2);}
+.plan-option .plan-price{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--naranja);margin-top:8px;}
+
+/* Mobile */
+@media(max-width:640px){
+  .sidebar{display:none;}
+  .sidebar.mob-open{display:flex;position:fixed;left:0;top:52px;bottom:0;z-index:40;}
+  .mob-toggle{display:flex!important;}
+}
+.mob-toggle{display:none;width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);cursor:pointer;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <button class="mob-toggle" id="mobToggle" onclick="document.querySelector('.sidebar').classList.toggle('mob-open')">☰</button>
+  <div class="topbar-logo">∑ MatemáticaCBC</div>
+  <div class="topbar-sep"></div>
+  <div class="topbar-user" id="topbarUser">Cargando...</div>
+  <span class="plan-badge" id="planBadge"></span>
+  <div class="topbar-sep"></div>
+  <button class="topbar-btn" id="btnLogout" onclick="logout()" style="display:none">Salir</button>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header"><h2>UNIDADES</h2></div>
+    <div style="flex:1;overflow-y:auto;" id="unitsList"></div>
+    <div class="sidebar-footer">
+      <div id="upgradeBox" style="display:none" class="upgrade-box">
+        <p>Suscribite para acceso ilimitado</p>
+        <button class="btn-upgrade" onclick="showUpgradeModal()">Ver planes →</button>
+      </div>
+      <div id="tutorLibreBtn" style="display:none;margin-top:8px;text-align:center">
+        <button onclick="showLibreMode()" style="background:none;border:1px solid var(--naranja);color:var(--naranja);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;width:100%">✏️ Tu propio ejercicio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main" id="mainArea">
+
+    <!-- Estado vacío inicial -->
+    <div class="empty-state" id="emptyState">
+      <div class="sym">∑</div>
+      <p style="font-size:16px;font-weight:600;margin-bottom:6px">Bienvenido/a a MatemáticaCBC</p>
+      <p>Elegí una unidad y un ejercicio para empezar a practicar con el tutor IA.</p>
+    </div>
+
+    <!-- Panel de ejercicio (oculto hasta seleccionar) -->
+    <div id="exerciseArea" style="display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0">
+
+      <!-- Panel con el enunciado -->
+      <div class="ex-panel">
+        <div class="ex-header">
+          <span class="ex-type" id="exType"></span>
+          <span class="ex-lvl" id="exLvl"></span>
+        </div>
+        <div class="ex-text" id="exText"></div>
+        <div class="prog-label" id="progLabel" style="display:none"></div>
+        <div class="prog-steps" id="progSteps"></div>
+        <button class="btn-show-ans" id="btnShowAns" onclick="toggleAns()">Ver respuesta</button>
+        <div class="ans-box" id="ansBox"></div>
+      </div>
+
+      <!-- Chat -->
+      <div class="chat-area" id="chatArea"></div>
+
+      <div class="chat-footer">
+        <div class="chat-input-row">
+          <div class="chat-input-wrap">
+            <textarea id="chatInput" placeholder="Escribí tu respuesta o pregunta..." rows="3"
+              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+          </div>
+          <button class="btn-send" id="btnSend" onclick="sendMsg()">↑</button>
+        </div>
+        <div class="chat-hint" id="chatHint"></div>
+      </div>
+    </div>
+
+    <!-- Tutor Libre -->
+    <div id="libreArea" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+      <div class="libre-panel">
+        <div class="libre-label">TUTOR LIBRE — Plan Completo</div>
+        <textarea id="libreInput" placeholder="Pegá tu ejercicio aquí (podés usar notación LaTeX)..."></textarea>
+        <button class="btn-libre-start" onclick="startLibre()">Empezar →</button>
+      </div>
+      <div class="chat-area" id="libreChatArea"></div>
+      <div class="chat-footer">
+        <div class="chat-input-row">
+          <div class="chat-input-wrap">
+            <textarea id="libreChatInput" placeholder="Tu respuesta..." rows="1"
+              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendLibreMsg();}"></textarea>
+          </div>
+          <button class="btn-send" id="btnLibreSend" onclick="sendLibreMsg()">↑</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="overlay" id="authOverlay">
+  <div class="modal">
+    <div class="modal-title">∑ MatemáticaCBC</div>
+    <div class="modal-sub">Tu tutor de Matemática CBC disponible 24hs</div>
+    <div class="modal-tabs">
+      <button class="modal-tab act" id="tabLogin" onclick="switchTab('login')">Ingresar</button>
+      <button class="modal-tab" id="tabRegister" onclick="switchTab('register')">Registrarse</button>
+    </div>
+    <div id="formMsg" class="modal-err"></div>
+    <div id="formOk" class="modal-ok"></div>
+
+    <!-- LOGIN -->
+    <div id="loginForm">
+      <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="tu@email.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="form-group"><label>Contraseña</label><input type="password" id="loginPass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn-submit" onclick="doLogin()">Ingresar →</button>
+      <span class="modal-link" onclick="switchTab('reset')">¿Olvidaste tu contraseña?</span>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="registerForm" style="display:none">
+      <div class="form-group"><label>Nombre</label><input type="text" id="regNombre" placeholder="Tu nombre"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="tu@email.com"></div>
+      <div class="form-group"><label>Contraseña (mín. 6 caracteres)</label><input type="password" id="regPass" placeholder="••••••"></div>
+      <button class="btn-submit" onclick="doRegister()">Crear cuenta →</button>
+    </div>
+
+    <!-- VERIFY -->
+    <div id="verifyForm" style="display:none">
+      <p style="font-size:14px;color:var(--text2);margin-bottom:16px">Te enviamos un código de 6 dígitos al email <span id="verifyEmailShow" style="color:var(--text)"></span></p>
+      <div class="form-group"><label>Código de verificación</label><input type="text" id="verifyCode" placeholder="123456" maxlength="6" style="letter-spacing:4px;font-family:'Space Mono',monospace;font-size:18px" onkeydown="if(event.key==='Enter')doVerify()"></div>
+      <button class="btn-submit" onclick="doVerify()">Verificar →</button>
+      <span class="modal-link" onclick="doResend()">Reenviar código</span>
+    </div>
+
+    <!-- RESET -->
+    <div id="resetForm" style="display:none">
+      <div class="form-group"><label>Email</label><input type="email" id="resetEmail" placeholder="tu@email.com"></div>
+      <button class="btn-submit" onclick="doResetRequest()">Enviar código →</button>
+      <div id="resetStep2" style="display:none;margin-top:14px">
+        <div class="form-group"><label>Código recibido</label><input type="text" id="resetCode" placeholder="ABCD1234" style="font-family:'Space Mono',monospace;letter-spacing:3px"></div>
+        <div class="form-group"><label>Nueva contraseña</label><input type="password" id="resetNewPass" placeholder="••••••"></div>
+        <button class="btn-submit" onclick="doResetConfirm()">Cambiar contraseña →</button>
+      </div>
+      <span class="modal-link" onclick="switchTab('login')">← Volver al inicio</span>
+    </div>
+  </div>
+</div>
+
+<!-- UPGRADE MODAL -->
+<div class="overlay hidden" id="upgradeOverlay">
+  <div class="modal upgrade-modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div class="modal-title" style="margin:0">Elegí tu plan</div>
+      <button onclick="closeUpgrade()" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div id="formMsgUpgrade" class="modal-err"></div>
+    <div class="plan-option sel" onclick="selectPlan('estandar',this)">
+      <h3>Plan Estándar</h3>
+      <p>Consultas ilimitadas al tutor IA · Las 6 unidades</p>
+      <div class="plan-price">$15.990 / 30 días</div>
+    </div>
+    <div class="plan-option" onclick="selectPlan('completo',this)">
+      <h3>Plan Completo</h3>
+      <p>Todo el Estándar + Tutor libre para tus propios ejercicios</p>
+      <div class="plan-price">$25.990 / 30 días</div>
+    </div>
+    <button class="btn-submit" onclick="doPurchase()">Pagar con MercadoPago →</button>
+    <p style="font-size:11px;color:var(--text3);text-align:center;margin-top:10px">Pago seguro · Sin renovación automática</p>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let TOKEN = localStorage.getItem('mcbc_token') || '';
+let USER = null;
+let currentExercise = null;
+let chatMessages = [];
+let libreMessages = [];
+let currentStep = 0;
+let selectedPlan = 'estandar';
+let libreEnunciado = '';
+
+// ── UTILS — Strip LaTeX para texto plano (sidebar, etc.) ──
+function stripLatex(text) {
+  return (text || '')
+    .replace(/\$\$[\s\S]*?\$\$/g, '')   // $$...$$
+    .replace(/\$[^$\n]*\$/g, '')         // $...$
+    .replace(/\\\([\s\S]*?\\\)/g, '')    // \(...\)
+    .replace(/\\\[[\s\S]*?\\\]/g, '')    // \[...\]
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// ── KATEX ──
+function renderMath(el) {
+  if (!el) return;
+  if (window.renderMathInElement) {
+    renderMathInElement(el, {
+      delimiters: [
+        {left:'$$',right:'$$',display:true},
+        {left:'$',right:'$',display:false},
+        {left:'\\(',right:'\\)',display:false},
+        {left:'\\[',right:'\\]',display:true},
+      ],
+      throwOnError: false,
+    });
+  } else {
+    if (!window._pendingKatex) window._pendingKatex = [];
+    window._pendingKatex.push(el);
+  }
+}
+
+// ── THEME ──
+function toggleTheme() {
+  document.body.classList.toggle('light');
+  localStorage.setItem('mcbc_theme', document.body.classList.contains('light') ? 'light' : 'dark');
+  document.querySelector('.theme-toggle').textContent = document.body.classList.contains('light') ? '🌙' : '☀️';
+}
+if (localStorage.getItem('mcbc_theme') === 'light') {
+  document.body.classList.add('light');
+  document.querySelector('.theme-toggle').textContent = '☀️';
+}
+
+// ── UTILS ──
+function api(url, opts = {}) {
+  if (!opts.headers) opts.headers = {};
+  opts.headers['Content-Type'] = 'application/json';
+  if (TOKEN) opts.headers['Authorization'] = 'Bearer ' + TOKEN;
+  return fetch(url, opts).then(async r => {
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Error desconocido');
+    return data;
+  });
+}
+
+function showFormMsg(text, type = 'err', el = 'formMsg') {
+  const m = document.getElementById(el);
+  if (!m) return;
+  m.textContent = text;
+  m.className = 'modal-' + type;
+  m.style.display = 'block';
+}
+
+function hideFormMsg(el = 'formMsg') {
+  const m = document.getElementById(el);
+  if (m) m.style.display = 'none';
+  const o = document.getElementById('formOk');
+  if (o) o.style.display = 'none';
+}
+
+// ── AUTH ──
+let pendingVerifyEmail = '';
+
+function switchTab(tab) {
+  hideFormMsg();
+  ['loginForm','registerForm','verifyForm','resetForm'].forEach(id => document.getElementById(id).style.display = 'none');
+  ['tabLogin','tabRegister'].forEach(id => document.getElementById(id)?.classList.remove('act'));
+  if (tab === 'login') { document.getElementById('loginForm').style.display = 'block'; document.getElementById('tabLogin')?.classList.add('act'); }
+  else if (tab === 'register') { document.getElementById('registerForm').style.display = 'block'; document.getElementById('tabRegister')?.classList.add('act'); }
+  else if (tab === 'verify') { document.getElementById('verifyForm').style.display = 'block'; }
+  else if (tab === 'reset') { document.getElementById('resetForm').style.display = 'block'; }
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  hideFormMsg();
+  if (!email || !pass) { showFormMsg('Completá email y contraseña'); return; }
+  try {
+    const data = await api('/api/login', { method: 'POST', body: JSON.stringify({ email, pass }) });
+    TOKEN = data.token;
+    localStorage.setItem('mcbc_token', TOKEN);
+    USER = data.user;
+    closeAuth();
+    initApp();
+  } catch (e) {
+    if (e.message.includes('Verificá')) {
+      pendingVerifyEmail = email;
+      document.getElementById('verifyEmailShow').textContent = email;
+      switchTab('verify');
+    } else {
+      showFormMsg(e.message);
+    }
+  }
+}
+
+async function doRegister() {
+  const nombre = document.getElementById('regNombre').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass = document.getElementById('regPass').value;
+  hideFormMsg();
+  if (!nombre || !email || !pass) { showFormMsg('Completá todos los campos'); return; }
+  try {
+    await api('/api/register', { method: 'POST', body: JSON.stringify({ nombre, email, pass }) });
+    pendingVerifyEmail = email;
+    document.getElementById('verifyEmailShow').textContent = email;
+    switchTab('verify');
+    showFormMsg('¡Revisá tu email! Te enviamos el código de verificación.', 'ok', 'formOk');
+    document.getElementById('formOk').style.display = 'block';
+    document.getElementById('formMsg').style.display = 'none';
+  } catch (e) { showFormMsg(e.message); }
+}
+
+async function doVerify() {
+  const code = document.getElementById('verifyCode').value.trim();
+  hideFormMsg();
+  if (!code) { showFormMsg('Ingresá el código'); return; }
+  try {
+    const data = await api('/api/verify-email', { method: 'POST', body: JSON.stringify({ email: pendingVerifyEmail, code }) });
+    TOKEN = data.token;
+    localStorage.setItem('mcbc_token', TOKEN);
+    USER = data.user;
+    closeAuth();
+    initApp();
+  } catch (e) { showFormMsg(e.message); }
+}
+
+async function doResend() {
+  try {
+    await api('/api/resend-verification', { method: 'POST', body: JSON.stringify({ email: pendingVerifyEmail }) });
+    document.getElementById('formOk').textContent = 'Código reenviado. Revisá tu email.';
+    document.getElementById('formOk').style.display = 'block';
+    document.getElementById('formMsg').style.display = 'none';
+  } catch (e) { showFormMsg(e.message); }
+}
+
+async function doResetRequest() {
+  const email = document.getElementById('resetEmail').value.trim();
+  if (!email) { showFormMsg('Ingresá tu email'); return; }
+  try {
+    await api('/api/reset-request', { method: 'POST', body: JSON.stringify({ email }) });
+    document.getElementById('resetStep2').style.display = 'block';
+    document.getElementById('formOk').textContent = 'Código enviado a ' + email;
+    document.getElementById('formOk').style.display = 'block';
+    document.getElementById('formMsg').style.display = 'none';
+  } catch (e) { showFormMsg(e.message); }
+}
+
+async function doResetConfirm() {
+  const token = document.getElementById('resetCode').value.trim();
+  const newPass = document.getElementById('resetNewPass').value;
+  if (!token || !newPass) { showFormMsg('Completá los campos'); return; }
+  try {
+    await api('/api/reset-confirm', { method: 'POST', body: JSON.stringify({ token, newPass }) });
+    switchTab('login');
+    document.getElementById('formOk').textContent = 'Contraseña cambiada. Ya podés ingresar.';
+    document.getElementById('formOk').style.display = 'block';
+    document.getElementById('formMsg').style.display = 'none';
+  } catch (e) { showFormMsg(e.message); }
+}
+
+function closeAuth() { document.getElementById('authOverlay').classList.add('hidden'); }
+
+async function logout() {
+  try { await api('/api/logout', { method: 'POST' }); } catch {}
+  TOKEN = '';
+  USER = null;
+  localStorage.removeItem('mcbc_token');
+  location.reload();
+}
+
+// ── INIT ──
+async function initApp() {
+  try {
+    const data = await api('/api/me');
+    USER = data.user;
+  } catch {
+    TOKEN = '';
+    localStorage.removeItem('mcbc_token');
+    showAuthModal();
+    return;
+  }
+  closeAuth();
+  updateTopbar();
+  await loadUnits();
+  // Check pago URL param
+  const params = new URLSearchParams(location.search);
+  if (params.get('pago') === 'ok') {
+    setTimeout(() => alert('¡Pago exitoso! Tu plan fue activado.'), 500);
+    history.replaceState({}, '', '/app');
+  }
+}
+
+function updateTopbar() {
+  if (!USER) return;
+  document.getElementById('topbarUser').textContent = USER.nombre;
+  const badge = document.getElementById('planBadge');
+  badge.textContent = USER.plan.toUpperCase();
+  badge.className = 'plan-badge plan-' + USER.plan;
+  document.getElementById('btnLogout').style.display = 'block';
+  const lim = getPlanLimits(USER);
+  if (lim.trial) {
+    document.getElementById('upgradeBox').style.display = 'block';
+  } else {
+    document.getElementById('upgradeBox').style.display = 'none';
+  }
+  if (USER.plan === 'completo') {
+    document.getElementById('tutorLibreBtn').style.display = 'block';
+  }
+}
+
+function getPlanLimits(user) {
+  if (!user) return { trial: true };
+  const planActivo = (user.plan === 'completo' || user.plan === 'estandar') && user.planExpiresAt
+    ? Date.now() <= new Date(user.planExpiresAt).getTime()
+    : true;
+  const plan = planActivo ? user.plan : 'gratis';
+  if (plan === 'completo') return { consultasDia: 999, tutorLibre: true, trial: false };
+  if (plan === 'estandar') return { consultasDia: 999, tutorLibre: false, trial: false };
+  return { consultasDia: 3, tutorLibre: false, trial: true };
+}
+
+// ── UNITS & EXERCISES ──
+let units = {}, exercises = {};
+
+async function loadUnits() {
+  const data = await api('/api/units');
+  units = data.units;
+  renderUnitList();
+}
+
+function renderUnitList() {
+  const container = document.getElementById('unitsList');
+  container.innerHTML = Object.entries(units).map(([num, unit]) => `
+    <div class="unit-item">
+      <button class="unit-toggle" onclick="toggleUnit(${num}, this)">
+        <span>${num}. ${unit.nombre}</span>
+        <span style="display:flex;align-items:center;gap:6px">
+          <span class="unit-count">${unit.count}</span>
+          <span class="unit-arrow">▶</span>
+        </span>
+      </button>
+      <div class="exercises-list" id="exList-${num}"></div>
+    </div>
+  `).join('');
+}
+
+async function toggleUnit(num, btn) {
+  btn.classList.toggle('open');
+  const list = document.getElementById('exList-' + num);
+  list.classList.toggle('open');
+  if (list.classList.contains('open') && !exercises[num]) {
+    list.innerHTML = '<div style="padding:12px 14px;font-size:12px;color:var(--text3)">Cargando...</div>';
+    const data = await api('/api/exercises/' + num);
+    exercises[num] = data.exercises;
+    renderExerciseList(num, data.exercises);
+  }
+}
+
+function renderExerciseList(num, exs) {
+  const list = document.getElementById('exList-' + num);
+  if (!exs || !exs.length) { list.innerHTML = '<div style="padding:10px 14px;font-size:12px;color:var(--text3)">Sin ejercicios disponibles</div>'; return; }
+  list.innerHTML = exs.map(ex => `
+    <div class="ex-item lv${ex.lv}" onclick="selectExercise(${ex.id}, ${num})" id="exItem-${ex.id}">
+      <div class="lv-dot"></div>
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${stripLatex(ex.type)}</span>
+    </div>
+  `).join('');
+}
+
+// ── SELECT EXERCISE ──
+function selectExercise(id, unitNum) {
+  // Load if not cached
+  if (!exercises[unitNum]) return;
+  const ex = exercises[unitNum].find(e => e.id === id);
+  if (!ex) return;
+  currentExercise = ex;
+  chatMessages = [];
+  currentStep = 0;
+
+  // Active state
+  document.querySelectorAll('.ex-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('exItem-' + id)?.classList.add('active');
+
+  // Show exercise area
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('libreArea').style.display = 'none';
+  const area = document.getElementById('exerciseArea');
+  area.style.display = 'flex';
+
+  // Fill exercise info
+  document.getElementById('exType').textContent = ex.type || '';
+  const lvlEl = document.getElementById('exLvl');
+  lvlEl.textContent = ex.lvl || '';
+  lvlEl.className = 'ex-lvl lv' + ex.lv;
+
+  // Render exercise text (with math)
+  const textEl = document.getElementById('exText');
+  textEl.textContent = '';
+  // Convert \n to <br> and render
+  textEl.innerHTML = (ex.text || '').replace(/\n/g, '<br>');
+  renderMath(textEl);
+
+  // Steps progress
+  const validSteps = (ex.steps || []).filter(s => s && s !== '—');
+  if (validSteps.length > 0) {
+    document.getElementById('progLabel').style.display = 'block';
+    document.getElementById('progLabel').textContent = 'Progreso: paso 0 de ' + validSteps.length;
+    document.getElementById('progSteps').innerHTML = validSteps.map(() => '<div class="ps"></div>').join('');
+  } else {
+    document.getElementById('progLabel').style.display = 'none';
+    document.getElementById('progSteps').innerHTML = '';
+  }
+
+  // Answer box
+  const ansBox = document.getElementById('ansBox');
+  ansBox.classList.remove('show');
+  ansBox.innerHTML = '';
+
+  // Clear chat
+  document.getElementById('chatArea').innerHTML = '';
+
+  // Initial AI message
+  addBubble('ai', '¡Hola! Estoy listo para ayudarte con este ejercicio. ¿Por dónde querés empezar?');
+
+  // Mobile: close sidebar
+  document.querySelector('.sidebar').classList.remove('mob-open');
+}
+
+// ── ANSWER TOGGLE ──
+function toggleAns() {
+  if (!currentExercise) return;
+  const box = document.getElementById('ansBox');
+  const btn = document.getElementById('btnShowAns');
+  if (box.classList.contains('show')) {
+    box.classList.remove('show');
+    btn.textContent = 'Ver respuesta';
+  } else {
+    box.textContent = currentExercise.ans || '(sin respuesta)';
+    renderMath(box);
+    box.classList.add('show');
+    btn.textContent = 'Ocultar respuesta';
+  }
+}
+
+// ── CHAT ──
+function addBubble(role, text, className = '') {
+  const area = document.getElementById('chatArea');
+  const wrap = document.createElement('div');
+  wrap.className = 'bubble-wrap ' + role;
+  const avatar = document.createElement('div');
+  avatar.className = 'bubble-avatar ' + role;
+  avatar.textContent = role === 'ai' ? '∑' : '👤';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ' + role + (className ? ' ' + className : '');
+  // Render math in bubble
+  bubble.innerHTML = text.replace(/\n/g, '<br>');
+  if (role === 'ai') wrap.appendChild(avatar);
+  wrap.appendChild(bubble);
+  if (role === 'usr') wrap.appendChild(avatar);
+  area.appendChild(wrap);
+  area.scrollTop = area.scrollHeight;
+  renderMath(bubble);
+  return bubble;
+}
+
+function addTyping() {
+  const area = document.getElementById('chatArea');
+  const wrap = document.createElement('div');
+  wrap.className = 'bubble-wrap ai';
+  wrap.id = 'typingIndicator';
+  const avatar = document.createElement('div');
+  avatar.className = 'bubble-avatar ai';
+  avatar.textContent = '∑';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ai';
+  bubble.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+  wrap.appendChild(avatar);
+  wrap.appendChild(bubble);
+  area.appendChild(wrap);
+  area.scrollTop = area.scrollHeight;
+}
+
+function removeTyping() {
+  document.getElementById('typingIndicator')?.remove();
+}
+
+async function sendMsg() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || !currentExercise) return;
+  const btn = document.getElementById('btnSend');
+  input.value = '';
+  btn.disabled = true;
+
+  chatMessages.push({ role: 'user', content: text });
+  addBubble('usr', text);
+  addTyping();
+
+  try {
+    const data = await api('/api/tutor', {
+      method: 'POST',
+      body: JSON.stringify({ exerciseId: currentExercise.id, messages: chatMessages }),
+    });
+    removeTyping();
+    const resp = data.response || '';
+    chatMessages.push({ role: 'assistant', content: resp });
+    addBubble('ai', resp);
+
+    // Update restantes hint
+    if (typeof data.restantes === 'number') {
+      const lim = getPlanLimits(USER);
+      if (lim.trial) {
+        document.getElementById('chatHint').textContent = data.restantes + ' consultas gratuitas restantes';
+      }
+    }
+
+    // Step progress heuristic
+    currentStep = Math.min(currentStep + 1, document.querySelectorAll('.ps').length);
+    updateStepProgress();
+
+  } catch (e) {
+    removeTyping();
+    if (e.message.includes('Suscribite') || e.message.includes('gratuitas')) {
+      addBubble('ai', e.message + ' ¿Querés ver los planes?', 'err');
+      showUpgradeModal();
+    } else {
+      addBubble('ai', 'Error: ' + e.message, 'err');
+    }
+  }
+  btn.disabled = false;
+}
+
+function updateStepProgress() {
+  const steps = document.querySelectorAll('.ps');
+  steps.forEach((el, i) => {
+    el.classList.remove('done', 'cur');
+    if (i < currentStep - 1) el.classList.add('done');
+    else if (i === currentStep - 1) el.classList.add('cur');
+  });
+  const lbl = document.getElementById('progLabel');
+  if (lbl && lbl.style.display !== 'none') {
+    lbl.textContent = 'Progreso: paso ' + currentStep + ' de ' + steps.length;
+  }
+}
+
+// ── TUTOR LIBRE ──
+function showLibreMode() {
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('exerciseArea').style.display = 'none';
+  document.getElementById('libreArea').style.display = 'flex';
+  libreMessages = [];
+  document.getElementById('libreChatArea').innerHTML = '';
+  document.querySelectorAll('.ex-item').forEach(el => el.classList.remove('active'));
+}
+
+async function startLibre() {
+  libreEnunciado = document.getElementById('libreInput').value.trim();
+  if (!libreEnunciado) return;
+  libreMessages = [];
+  const area = document.getElementById('libreChatArea');
+  area.innerHTML = '';
+  addLibreBubble('ai', '¡Entendido! ¿Por dónde querés empezar a resolver este ejercicio?');
+}
+
+function addLibreBubble(role, text) {
+  const area = document.getElementById('libreChatArea');
+  const wrap = document.createElement('div');
+  wrap.className = 'bubble-wrap ' + role;
+  const avatar = document.createElement('div');
+  avatar.className = 'bubble-avatar ' + role;
+  avatar.textContent = role === 'ai' ? '∑' : '👤';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ' + role;
+  bubble.innerHTML = text.replace(/\n/g, '<br>');
+  if (role === 'ai') wrap.appendChild(avatar);
+  wrap.appendChild(bubble);
+  if (role === 'usr') wrap.appendChild(avatar);
+  area.appendChild(wrap);
+  area.scrollTop = area.scrollHeight;
+  renderMath(bubble);
+}
+
+async function sendLibreMsg() {
+  const input = document.getElementById('libreChatInput');
+  const text = input.value.trim();
+  if (!text || !libreEnunciado) return;
+  input.value = '';
+  document.getElementById('btnLibreSend').disabled = true;
+  libreMessages.push({ role: 'user', content: text });
+  addLibreBubble('usr', text);
+
+  try {
+    const data = await api('/api/tutor-libre', {
+      method: 'POST',
+      body: JSON.stringify({ enunciado: libreEnunciado, messages: libreMessages }),
+    });
+    const resp = data.response || '';
+    libreMessages.push({ role: 'assistant', content: resp });
+    addLibreBubble('ai', resp);
+  } catch (e) {
+    addLibreBubble('ai', 'Error: ' + e.message);
+  }
+  document.getElementById('btnLibreSend').disabled = false;
+}
+
+// ── UPGRADE ──
+function showUpgradeModal() { document.getElementById('upgradeOverlay').classList.remove('hidden'); }
+function closeUpgrade() { document.getElementById('upgradeOverlay').classList.add('hidden'); }
+function selectPlan(plan, el) {
+  selectedPlan = plan;
+  document.querySelectorAll('.plan-option').forEach(e => e.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+async function doPurchase() {
+  const errEl = document.getElementById('formMsgUpgrade');
+  errEl.style.display = 'none';
+  try {
+    const data = await api('/api/mp/create-preference', { method: 'POST', body: JSON.stringify({ plan: selectedPlan }) });
+    if (data.initPoint) window.location.href = data.initPoint;
+  } catch (e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+  }
+}
+
+// ── AUTH MODAL ──
+function showAuthModal() {
+  document.getElementById('authOverlay').classList.remove('hidden');
+}
+
+// ── BOOT ──
+if (TOKEN) {
+  initApp();
+} else {
+  showAuthModal();
+}
+</script>
+
+<!-- WA_BUTTON -->
+<!-- CONTACT_EMAIL_BTN -->
+</body>
+</html>

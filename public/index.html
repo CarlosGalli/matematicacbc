@@ -49,6 +49,11 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear
 .topbar-btn:hover{color:var(--text);}
 .theme-toggle{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:.2s;flex-shrink:0;}
 .theme-toggle:hover{border-color:var(--naranja);}
+.modo-toggle{display:none;gap:0;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:var(--bg3);flex-shrink:0;}
+.modo-btn{padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--text3);font-family:'Space Mono',monospace;transition:all .2s;white-space:nowrap;letter-spacing:.04em;}
+.modo-btn.act{background:var(--naranja);color:#000;}
+.modo-btn:hover:not(.act){color:var(--text);}
+body.modo-basico .sidebar{display:none;}
 
 /* ── LAYOUT ── */
 .layout{display:flex;height:100vh;padding-top:52px;}
@@ -234,6 +239,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear
   <div class="topbar-user" id="topbarUser">Cargando...</div>
   <span class="plan-badge" id="planBadge"></span>
   <div class="topbar-sep"></div>
+  <div class="modo-toggle" id="modoToggle">
+    <button class="modo-btn act" id="modo-basico-btn" onclick="setLayoutMode('basico')">⚡ Básico</button>
+    <button class="modo-btn" id="modo-completo-btn" onclick="setLayoutMode('completo')">☰ Completo</button>
+  </div>
   <button class="topbar-btn" id="btnProgress" onclick="showProgressModal()" style="display:none" title="Mi progreso">📊</button>
   <button class="topbar-btn" id="btnLogout" onclick="logout()" style="display:none">Salir</button>
   <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
@@ -624,6 +633,7 @@ async function initApp() {
   initFavorites();
   initStats();
   updateTopbar();
+  setLayoutMode(localStorage.getItem('mcbc_layout_mode') || 'basico');
   await loadUnits();
   // Check pago URL param
   const params = new URLSearchParams(location.search);
@@ -825,6 +835,14 @@ async function exportPDF() {
   track('export_pdf', { exercise_id: currentExercise.id });
 }
 
+function setLayoutMode(mode) {
+  const isBasico = mode === 'basico';
+  document.body.classList.toggle('modo-basico', isBasico);
+  document.getElementById('modo-basico-btn').classList.toggle('act', isBasico);
+  document.getElementById('modo-completo-btn').classList.toggle('act', !isBasico);
+  localStorage.setItem('mcbc_layout_mode', mode);
+}
+
 function updateTopbar() {
   if (!USER) return;
   document.getElementById('topbarUser').textContent = USER.nombre;
@@ -839,6 +857,7 @@ function updateTopbar() {
   }
   document.getElementById('btnLogout').style.display = 'block';
   document.getElementById('btnProgress').style.display = 'block';
+  document.getElementById('modoToggle').style.display = 'flex';
   if (lim.trial) {
     document.getElementById('upgradeBox').style.display = 'block';
     const msg = document.getElementById('trialMsg');

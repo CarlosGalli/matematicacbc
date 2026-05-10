@@ -113,7 +113,7 @@ function requireAdmin(req, res, next) {
 function sendEmail({ to, subject, html }) {
   const KEY = process.env.RESEND_API_KEY;
   if (!KEY) return Promise.resolve(false);
-  const from = process.env.CONTACT_EMAIL ? `MatemáticaCBC <${process.env.CONTACT_EMAIL}>` : 'MatemáticaCBC <noreply@matematicacbc.com>';
+  const from = process.env.FROM_EMAIL || 'MatemáticaCBC <noreply@matematicacbc.com>';
   return fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json' },

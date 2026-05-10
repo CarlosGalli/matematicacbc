@@ -107,10 +107,14 @@ body.modo-basico .sidebar{display:none;}
 .btn-show-ans:hover{border-color:var(--naranja);color:var(--naranja);}
 .ans-box{margin-top:8px;padding:10px 14px;background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.25);border-radius:8px;font-size:13px;display:none;overflow-x:auto;}
 .ans-box .katex-display{margin:4px 0;}
-/* Fix flex-column overflow: permite que exerciseArea se comprima a la altura asignada */
+/* Fix flex-column overflow */
 #exerciseArea,#libreArea{min-height:0;}
-/* Limita el panel del enunciado para que el chat siempre sea visible */
-.ex-panel{overflow-y:auto;max-height:45vh;}
+/* Stacked layout: enunciado 25% / chat 75% */
+#exerciseArea{flex-direction:column;}
+.ex-zone{max-height:28%;overflow-y:auto;border-bottom:1px solid var(--border);flex-shrink:0;}
+.ex-zone .ex-panel{border-bottom:none;max-height:none;}
+.chat-zone{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+@media(max-width:640px){.ex-zone{max-height:40%;}.chat-zone{flex:1;}}
 /* Sidebar: reserva espacio para el scrollbar y usa scrollbar fino para no solapar */
 #unitsList{scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 #unitsList::-webkit-scrollbar{width:4px;}
@@ -143,10 +147,10 @@ body.modo-basico .sidebar{display:none;}
 @keyframes blink{0%,80%,100%{opacity:.2;}40%{opacity:1;}}
 
 /* ── CHAT INPUT ── */
-.chat-footer{padding:12px 16px;border-top:1px solid var(--border);background:var(--bg2);}
+.chat-footer{padding:10px 16px 14px;background:var(--bg1);}
 .chat-input-row{display:flex;gap:8px;align-items:flex-end;}
 .chat-input-wrap{flex:1;position:relative;}
-#chatInput{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 14px;font-size:14px;font-family:'DM Sans',sans-serif;resize:none;min-height:126px;max-height:360px;overflow-y:auto;transition:.2s;line-height:1.5;}
+#chatInput{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:10px 14px;font-size:14px;font-family:'DM Sans',sans-serif;resize:none;min-height:80px;max-height:300px;overflow-y:auto;transition:border-color .2s;line-height:1.6;box-shadow:0 1px 4px rgba(0,0,0,.12);}
 #chatInput:focus{outline:none;border-color:var(--naranja);}
 #chatInput::placeholder{color:var(--text3);}
 .btn-send{background:var(--naranja);color:#000;border:none;border-radius:8px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;transition:.2s;}
@@ -290,36 +294,40 @@ body.modo-basico .sidebar{display:none;}
     </div>
 
     <!-- Panel de ejercicio (oculto hasta seleccionar) -->
-    <div id="exerciseArea" style="display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0">
+    <div id="exerciseArea" style="display:none;flex:1;overflow:hidden;min-height:0">
 
-      <!-- Panel con el enunciado -->
-      <div class="ex-panel">
-        <div class="ex-header">
-          <span class="ex-type" id="exType"></span>
-          <span class="ex-lvl" id="exLvl"></span>
+      <!-- Zona superior: enunciado (25%) -->
+      <div class="ex-zone">
+        <div class="ex-panel">
+          <div class="ex-header">
+            <span class="ex-type" id="exType"></span>
+            <span class="ex-lvl" id="exLvl"></span>
+          </div>
+          <div class="ex-text" id="exText"></div>
+          <div class="prog-label" id="progLabel" style="display:none"></div>
+          <div class="prog-steps" id="progSteps"></div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap;">
+            <button class="btn-show-ans" id="btnShowAns" onclick="toggleAns()">Ver respuesta</button>
+            <button class="btn-export" id="btnExport" onclick="exportPDF()" style="display:none">📄 Exportar chat</button>
+          </div>
+          <div class="ans-box" id="ansBox"></div>
         </div>
-        <div class="ex-text" id="exText"></div>
-        <div class="prog-label" id="progLabel" style="display:none"></div>
-        <div class="prog-steps" id="progSteps"></div>
-        <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap;">
-          <button class="btn-show-ans" id="btnShowAns" onclick="toggleAns()">Ver respuesta</button>
-          <button class="btn-export" id="btnExport" onclick="exportPDF()" style="display:none">📄 Exportar chat</button>
-        </div>
-        <div class="ans-box" id="ansBox"></div>
       </div>
 
-      <!-- Chat -->
-      <div class="chat-area" id="chatArea"></div>
-
-      <div class="chat-footer">
-        <div class="chat-input-row">
-          <div class="chat-input-wrap">
-            <textarea id="chatInput" placeholder="Escribí tu respuesta o pregunta..." rows="3"
-              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+      <!-- Zona inferior: chat continuo (75%) -->
+      <div class="chat-zone">
+        <div class="chat-area" id="chatArea"></div>
+        <div class="chat-footer">
+          <div class="chat-input-row">
+            <div class="chat-input-wrap">
+              <textarea id="chatInput" placeholder="Escribí tu respuesta o pregunta..."
+                oninput="chatInputResize(this)"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+            </div>
+            <button class="btn-send" id="btnSend" onclick="sendMsg()">↑</button>
           </div>
-          <button class="btn-send" id="btnSend" onclick="sendMsg()">↑</button>
+          <div class="chat-hint" id="chatHint"></div>
         </div>
-        <div class="chat-hint" id="chatHint"></div>
       </div>
     </div>
 
@@ -1064,12 +1072,18 @@ function removeTyping() {
   document.getElementById('typingIndicator')?.remove();
 }
 
+function chatInputResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 300) + 'px';
+}
+
 async function sendMsg() {
   const input = document.getElementById('chatInput');
   const text = input.value.trim();
   if (!text || !currentExercise) return;
   const btn = document.getElementById('btnSend');
   input.value = '';
+  input.style.height = '';
   btn.disabled = true;
 
   chatMessages.push({ role: 'user', content: text });

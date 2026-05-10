@@ -87,7 +87,7 @@ function getPlanLimits(user) {
   if (planEfectivo === 'completo') return { consultasDia: 999, tutorLibre: true, trial: false };
   if (planEfectivo === 'estandar') return { consultasDia: 999, tutorLibre: false, trial: false };
   const dias = Math.floor((Date.now() - new Date(user.createdAt).getTime()) / 86400000);
-  return { consultasDia: 3, tutorLibre: false, trial: true, trialActivo: dias < 5, diasRestantes: Math.max(0, 5 - dias) };
+  return { consultasDia: 999, tutorLibre: true, trial: true, trialActivo: dias < 7, diasRestantes: Math.max(0, 7 - dias) };
 }
 
 function generateSixDigitCode() {
@@ -207,22 +207,24 @@ function checkConsulta(userId) {
     user.consultasFecha = new Date().toDateString();
   }
   const lim = getPlanLimits(user);
-  if (lim.trial) {
-    if (!lim.trialActivo) return { ok: false, error: 'Tu período de prueba terminó. Suscribite para continuar.' };
-    if ((user.consultasTotales || 0) >= 3) return { ok: false, error: 'Usaste tus 3 consultas gratuitas. Suscribite para continuar.' };
+  if (lim.trial && !lim.trialActivo) {
+    return { ok: false, error: 'Tu trial de 7 días venció. Suscribite para continuar.' };
   }
   if (!lim.trial && user.consultasHoy >= lim.consultasDia) return { ok: false, error: 'Límite diario alcanzado.' };
   user.consultasHoy++;
   user.consultasTotales = (user.consultasTotales || 0) + 1;
   writeDB(db);
-  return { ok: true, restantes: lim.trial ? Math.max(0, 3 - user.consultasTotales) : lim.consultasDia - user.consultasHoy };
+  return { ok: true, restantes: lim.trial ? lim.diasRestantes : lim.consultasDia - user.consultasHoy };
 }
 
 function checkTutorLibre(userId) {
   const db = readDB();
   const user = db.users.find(u => u.id === userId);
   if (!user) return { ok: false, error: 'Usuario no encontrado' };
-  if (!getPlanLimits(user).tutorLibre) return { ok: false, error: 'El tutor libre está disponible solo en el plan Completo.' };
+  checkAndDowngradePlan(user, db);
+  const lim = getPlanLimits(user);
+  if (lim.trial && !lim.trialActivo) return { ok: false, error: 'Tu trial de 7 días venció. Suscribite para continuar.' };
+  if (!lim.tutorLibre) return { ok: false, error: 'El tutor libre está disponible solo en el plan Completo.' };
   return { ok: true };
 }
 

@@ -218,7 +218,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear
     <div style="flex:1;overflow-y:auto;" id="unitsList"></div>
     <div class="sidebar-footer">
       <div id="upgradeBox" style="display:none" class="upgrade-box">
-        <p>Suscribite para acceso ilimitado</p>
+        <p id="trialMsg">Suscribite para acceso ilimitado</p>
         <button class="btn-upgrade" onclick="showUpgradeModal()">Ver planes →</button>
       </div>
       <div id="tutorLibreBtn" style="display:none;margin-top:8px;text-align:center">
@@ -579,29 +579,42 @@ function updateTopbar() {
   if (!USER) return;
   document.getElementById('topbarUser').textContent = USER.nombre;
   const badge = document.getElementById('planBadge');
-  badge.textContent = USER.plan.toUpperCase();
-  badge.className = 'plan-badge plan-' + USER.plan;
-  document.getElementById('btnLogout').style.display = 'block';
   const lim = getPlanLimits(USER);
   if (lim.trial) {
+    badge.textContent = 'TRIAL';
+    badge.className = 'plan-badge plan-gratis';
+  } else {
+    badge.textContent = USER.plan.toUpperCase();
+    badge.className = 'plan-badge plan-' + USER.plan;
+  }
+  document.getElementById('btnLogout').style.display = 'block';
+  if (lim.trial) {
     document.getElementById('upgradeBox').style.display = 'block';
+    const msg = document.getElementById('trialMsg');
+    if (lim.trialActivo) {
+      const d = lim.diasRestantes;
+      msg.textContent = `Trial: ${d} día${d !== 1 ? 's' : ''} restante${d !== 1 ? 's' : ''}`;
+    } else {
+      msg.textContent = 'Tu trial de 7 días venció';
+    }
   } else {
     document.getElementById('upgradeBox').style.display = 'none';
   }
-  if (USER.plan === 'completo') {
+  if (USER.plan === 'completo' || (lim.trial && lim.trialActivo)) {
     document.getElementById('tutorLibreBtn').style.display = 'block';
   }
 }
 
 function getPlanLimits(user) {
-  if (!user) return { trial: true };
+  if (!user) return { trial: true, trialActivo: true, diasRestantes: 7 };
   const planActivo = (user.plan === 'completo' || user.plan === 'estandar') && user.planExpiresAt
     ? Date.now() <= new Date(user.planExpiresAt).getTime()
     : true;
   const plan = planActivo ? user.plan : 'gratis';
   if (plan === 'completo') return { consultasDia: 999, tutorLibre: true, trial: false };
   if (plan === 'estandar') return { consultasDia: 999, tutorLibre: false, trial: false };
-  return { consultasDia: 3, tutorLibre: false, trial: true };
+  const dias = Math.floor((Date.now() - new Date(user.createdAt).getTime()) / 86400000);
+  return { consultasDia: 999, tutorLibre: true, trial: true, trialActivo: dias < 7, diasRestantes: Math.max(0, 7 - dias) };
 }
 
 // ── UNITS & EXERCISES ──
@@ -796,8 +809,9 @@ async function sendMsg() {
     // Update restantes hint
     if (typeof data.restantes === 'number') {
       const lim = getPlanLimits(USER);
-      if (lim.trial) {
-        document.getElementById('chatHint').textContent = data.restantes + ' consultas gratuitas restantes';
+      if (lim.trial && lim.trialActivo) {
+        const d = lim.diasRestantes;
+        document.getElementById('chatHint').textContent = `Trial: ${d} día${d !== 1 ? 's' : ''} restante${d !== 1 ? 's' : ''}`;
       }
     }
 
@@ -807,7 +821,7 @@ async function sendMsg() {
 
   } catch (e) {
     removeTyping();
-    if (e.message.includes('Suscribite') || e.message.includes('gratuitas')) {
+    if (e.message.includes('Suscribite') || e.message.includes('trial') || e.message.includes('gratuitas')) {
       addBubble('ai', e.message + ' ¿Querés ver los planes?', 'err');
       showUpgradeModal();
     } else {

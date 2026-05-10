@@ -193,6 +193,35 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear
   .mob-toggle{display:flex!important;}
 }
 .mob-toggle{display:none;width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);cursor:pointer;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+
+/* ── SEARCH ── */
+.search-wrap{padding:8px 10px 4px;}
+.search-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:6px 10px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;transition:.2s;}
+.search-input:focus{border-color:var(--naranja);}
+.search-input::placeholder{color:var(--text3);}
+.filter-row{display:flex;gap:4px;padding:4px 10px 8px;border-bottom:1px solid var(--border);}
+.filter-btn{flex:1;padding:3px 0;font-size:11px;font-weight:600;border:1px solid var(--border);border-radius:5px;background:none;color:var(--text3);cursor:pointer;transition:.15s;font-family:'DM Sans',sans-serif;}
+.filter-btn:hover{border-color:var(--naranja);color:var(--naranja);}
+.filter-btn.act{background:rgba(255,140,0,.15);border-color:var(--naranja);color:var(--naranja);}
+
+/* ── FAVORITOS ── */
+.fav-header{padding:8px 14px 4px;font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.05em;font-family:'Space Mono',monospace;display:flex;align-items:center;gap:6px;}
+.fav-section{border-bottom:1px solid var(--border);}
+.fav-icon{font-size:13px;color:var(--rojo);cursor:pointer;flex-shrink:0;opacity:0;transition:opacity .15s;line-height:1;padding:0 2px;}
+.ex-item:hover .fav-icon,.ex-item.faved .fav-icon{opacity:1;}
+
+/* ── PROGRESS MODAL ── */
+.progress-modal{max-width:460px;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
+.stat-value{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--naranja);margin-bottom:4px;}
+.stat-label{font-size:11px;color:var(--text3);}
+.unit-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border2);}
+.unit-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+
+/* ── EXPORT ── */
+.btn-export{background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;transition:.2s;white-space:nowrap;}
+.btn-export:hover{border-color:var(--naranja);color:var(--naranja);}
 </style>
 </head>
 <body>
@@ -205,6 +234,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear
   <div class="topbar-user" id="topbarUser">Cargando...</div>
   <span class="plan-badge" id="planBadge"></span>
   <div class="topbar-sep"></div>
+  <button class="topbar-btn" id="btnProgress" onclick="showProgressModal()" style="display:none" title="Mi progreso">📊</button>
   <button class="topbar-btn" id="btnLogout" onclick="logout()" style="display:none">Salir</button>
   <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
 </div>
@@ -215,6 +245,19 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear
   <!-- SIDEBAR -->
   <div class="sidebar" id="sidebar">
     <div class="sidebar-header"><h2>UNIDADES</h2></div>
+    <div class="search-wrap">
+      <input type="text" class="search-input" id="searchInput" placeholder="Buscar ejercicio..." oninput="onSearch(this.value)">
+    </div>
+    <div class="filter-row">
+      <button class="filter-btn act" onclick="setLevelFilter(0,this)">Todos</button>
+      <button class="filter-btn" onclick="setLevelFilter(1,this)">⭐</button>
+      <button class="filter-btn" onclick="setLevelFilter(2,this)">⭐⭐</button>
+      <button class="filter-btn" onclick="setLevelFilter(3,this)">⭐⭐⭐</button>
+    </div>
+    <div class="fav-section" id="favsSection" style="display:none">
+      <div class="fav-header">♥ Favoritos</div>
+      <div id="favsList"></div>
+    </div>
     <div style="flex:1;overflow-y:auto;" id="unitsList"></div>
     <div class="sidebar-footer">
       <div id="upgradeBox" style="display:none" class="upgrade-box">
@@ -249,7 +292,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear
         <div class="ex-text" id="exText"></div>
         <div class="prog-label" id="progLabel" style="display:none"></div>
         <div class="prog-steps" id="progSteps"></div>
-        <button class="btn-show-ans" id="btnShowAns" onclick="toggleAns()">Ver respuesta</button>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap;">
+          <button class="btn-show-ans" id="btnShowAns" onclick="toggleAns()">Ver respuesta</button>
+          <button class="btn-export" id="btnExport" onclick="exportPDF()" style="display:none">📄 Exportar chat</button>
+        </div>
         <div class="ans-box" id="ansBox"></div>
       </div>
 
@@ -373,6 +419,16 @@ let libreMessages = [];
 let currentStep = 0;
 let selectedPlan = 'estandar';
 let libreEnunciado = '';
+let FAVORITES = new Set();
+let searchQuery = '';
+let searchLevel = 0;
+let localStats = { totalEx: 0, totalMinutes: 0, startTime: Date.now(), unitsWorked: new Set() };
+let _statsTimer = null;
+
+// ── GA4 ──
+function track(name, params = {}) {
+  if (typeof gtag === 'function') gtag('event', name, params);
+}
 
 // ── UTILS — Strip LaTeX para texto plano (sidebar, etc.) ──
 function stripLatex(text) {
@@ -565,14 +621,208 @@ async function initApp() {
     return;
   }
   closeAuth();
+  initFavorites();
+  initStats();
   updateTopbar();
   await loadUnits();
   // Check pago URL param
   const params = new URLSearchParams(location.search);
   if (params.get('pago') === 'ok') {
+    track('plan_acquired', { plan: USER.plan });
     setTimeout(() => alert('¡Pago exitoso! Tu plan fue activado.'), 500);
     history.replaceState({}, '', '/app');
   }
+}
+
+// ── FAVORITOS ──
+function initFavorites() {
+  FAVORITES = new Set((USER.favorites || []).map(String));
+  renderFavorites();
+}
+
+async function toggleFavorite(exerciseId, unitNum, evt) {
+  if (evt) evt.stopPropagation();
+  const id = String(exerciseId);
+  if (FAVORITES.has(id)) { FAVORITES.delete(id); } else { FAVORITES.add(id); }
+  document.querySelectorAll(`.fav-icon[data-id="${id}"]`).forEach(el => {
+    el.textContent = FAVORITES.has(id) ? '♥' : '♡';
+    el.closest('.ex-item')?.classList.toggle('faved', FAVORITES.has(id));
+  });
+  renderFavorites();
+  try { await api('/api/favorites/toggle', { method: 'POST', body: JSON.stringify({ exerciseId: id }) }); } catch {}
+}
+
+function renderFavorites() {
+  const section = document.getElementById('favsSection');
+  const list = document.getElementById('favsList');
+  if (FAVORITES.size === 0) { section.style.display = 'none'; return; }
+  const favExs = [];
+  Object.entries(exercises).forEach(([unitNum, exs]) => {
+    exs.forEach(ex => { if (FAVORITES.has(String(ex.id))) favExs.push({ ...ex, unitNum: parseInt(unitNum) }); });
+  });
+  if (!favExs.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = favExs.map(ex => `
+    <div class="ex-item lv${ex.lv} faved" onclick="selectExercise(${ex.id},${ex.unitNum})" id="favItem-${ex.id}">
+      <div class="lv-dot"></div>
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${stripLatex(ex.type)}</span>
+      <span class="fav-icon" data-id="${ex.id}" onclick="toggleFavorite(${ex.id},${ex.unitNum},event)">♥</span>
+    </div>`).join('');
+}
+
+// ── BÚSQUEDA ──
+let _searchTimer;
+function onSearch(query) {
+  clearTimeout(_searchTimer);
+  searchQuery = query.trim();
+  _searchTimer = setTimeout(doSearch, 280);
+}
+
+function setLevelFilter(level, btn) {
+  searchLevel = level;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('act'));
+  btn.classList.add('act');
+  doSearch();
+}
+
+async function doSearch() {
+  const isFiltered = searchQuery || searchLevel !== 0;
+  if (!isFiltered) { renderUnitList(); return; }
+  // Cargar unidades no cacheadas
+  const toLoad = Object.keys(units).map(Number).filter(n => !exercises[n]);
+  if (toLoad.length) {
+    await Promise.all(toLoad.map(async n => {
+      const d = await api('/api/exercises/' + n);
+      exercises[n] = d.exercises;
+    }));
+  }
+  const q = searchQuery.toLowerCase();
+  const results = [];
+  Object.entries(exercises).forEach(([unitNum, exs]) => {
+    exs.forEach(ex => {
+      const matchQ = !searchQuery || stripLatex(ex.type).toLowerCase().includes(q) || stripLatex(ex.text || '').toLowerCase().includes(q);
+      const matchL = searchLevel === 0 || ex.lv === searchLevel;
+      if (matchQ && matchL) results.push({ ...ex, unitNum: parseInt(unitNum) });
+    });
+  });
+  const container = document.getElementById('unitsList');
+  if (!results.length) {
+    container.innerHTML = '<div style="padding:24px 14px;font-size:13px;color:var(--text3);text-align:center">Sin resultados</div>';
+    return;
+  }
+  container.innerHTML = results.map(ex => `
+    <div class="ex-item lv${ex.lv}${FAVORITES.has(String(ex.id)) ? ' faved' : ''}" onclick="selectExercise(${ex.id},${ex.unitNum})" id="exItem-${ex.id}">
+      <div class="lv-dot"></div>
+      <div style="flex:1;overflow:hidden">
+        <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${stripLatex(ex.type)}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:1px">U${ex.unitNum} · ${ex.lvl}</div>
+      </div>
+      <span class="fav-icon" data-id="${ex.id}" onclick="toggleFavorite(${ex.id},${ex.unitNum},event)">${FAVORITES.has(String(ex.id)) ? '♥' : '♡'}</span>
+    </div>`).join('');
+}
+
+// ── STATS ──
+function initStats() {
+  localStats.totalEx = USER.totalEx || 0;
+  localStats.totalMinutes = USER.totalMinutes || 0;
+  localStats.unitsWorked = new Set(USER.unitsWorked || []);
+  localStats.startTime = Date.now() - (localStats.totalMinutes * 60000);
+  _statsTimer = setInterval(syncStats, 60000);
+  window.addEventListener('beforeunload', syncStats);
+}
+
+async function syncStats() {
+  if (!USER) return;
+  const mins = Math.floor((Date.now() - localStats.startTime) / 60000);
+  localStats.totalMinutes = mins;
+  try {
+    await api('/api/stats/sync', { method: 'POST', body: JSON.stringify({
+      totalEx: localStats.totalEx,
+      totalMinutes: localStats.totalMinutes,
+      unitsWorked: [...localStats.unitsWorked],
+    })});
+    USER.totalEx = Math.max(USER.totalEx || 0, localStats.totalEx);
+    USER.totalMinutes = Math.max(USER.totalMinutes || 0, localStats.totalMinutes);
+  } catch {}
+}
+
+// ── DASHBOARD PROGRESO ──
+function showProgressModal() {
+  const lim = getPlanLimits(USER);
+  const planLabel = lim.trial
+    ? (lim.trialActivo ? `Trial (${lim.diasRestantes} días restantes)` : 'Trial vencido')
+    : (USER.plan.charAt(0).toUpperCase() + USER.plan.slice(1));
+  const unitsWorked = [...localStats.unitsWorked];
+  const totalU = Object.keys(units).length;
+  const unitRows = Object.entries(units).map(([num, u]) => {
+    const done = unitsWorked.includes(parseInt(num));
+    return `<div class="unit-row">
+      <div class="unit-num" style="background:${done ? 'var(--verde)' : 'var(--border)'};color:${done ? '#000' : 'var(--text3)'}">${num}</div>
+      <div style="flex:1;font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.nombre}</div>
+      <div style="font-size:11px;color:${done ? 'var(--verde)' : 'var(--text3)'}">${done ? '✓' : '·'}</div>
+    </div>`;
+  }).join('');
+  const mins = localStats.totalMinutes;
+  const timeStr = mins < 60 ? `${mins}min` : `${Math.floor(mins/60)}h ${mins%60}min`;
+  document.getElementById('progressContent').innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-value">${localStats.totalEx}</div><div class="stat-label">Ejercicios trabajados</div></div>
+      <div class="stat-card"><div class="stat-value">${mins > 0 ? timeStr : '—'}</div><div class="stat-label">Tiempo de estudio</div></div>
+      <div class="stat-card"><div class="stat-value">${USER.consultasTotales || 0}</div><div class="stat-label">Consultas al tutor</div></div>
+      <div class="stat-card"><div class="stat-value">${unitsWorked.length}/${totalU}</div><div class="stat-label">Unidades visitadas</div></div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);font-family:'Space Mono',monospace;margin-bottom:10px;letter-spacing:.05em">PLAN: ${planLabel.toUpperCase()}${FAVORITES.size > 0 ? ` · ♥ ${FAVORITES.size} favorito${FAVORITES.size!==1?'s':''}` : ''}</div>
+    <div>${unitRows}</div>`;
+  document.getElementById('progressOverlay').classList.remove('hidden');
+}
+function closeProgressModal() { document.getElementById('progressOverlay').classList.add('hidden'); }
+
+// ── PDF EXPORT ──
+function loadJsPDF() {
+  return new Promise((resolve, reject) => {
+    if (window.jspdf) return resolve();
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+async function exportPDF() {
+  if (!currentExercise || !chatMessages.length) { alert('No hay conversación para exportar.'); return; }
+  try { await loadJsPDF(); } catch { alert('No se pudo cargar la librería PDF. Verificá tu conexión.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const pageW = doc.internal.pageSize.getWidth();
+  const margin = 15;
+  const maxW = pageW - 2 * margin;
+  let y = 22;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.setTextColor(255, 140, 0);
+  doc.text('MatemáticaCBC — Historial de consulta', margin, y); y += 7;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(120, 120, 120);
+  doc.text(`${stripLatex(currentExercise.type)} · ${new Date().toLocaleDateString('es-AR')}`, margin, y); y += 4;
+  doc.setDrawColor(220, 220, 220);
+  doc.line(margin, y, pageW - margin, y); y += 8;
+  chatMessages.forEach(msg => {
+    const isUser = msg.role === 'user';
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(isUser ? 60 : 31, isUser ? 60 : 111, isUser ? 60 : 235);
+    doc.text(isUser ? 'Vos:' : 'Tutor IA:', margin, y); y += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(30, 30, 30);
+    const lines = doc.splitTextToSize(stripLatex(msg.content), maxW);
+    lines.forEach(line => { if (y > 272) { doc.addPage(); y = 20; } doc.text(line, margin, y); y += 6; });
+    y += 3;
+  });
+  const fname = `mcbc-${stripLatex(currentExercise.type).slice(0,30).replace(/[^a-z0-9]/gi,'_')}.pdf`;
+  doc.save(fname);
+  track('export_pdf', { exercise_id: currentExercise.id });
 }
 
 function updateTopbar() {
@@ -588,6 +838,7 @@ function updateTopbar() {
     badge.className = 'plan-badge plan-' + USER.plan;
   }
   document.getElementById('btnLogout').style.display = 'block';
+  document.getElementById('btnProgress').style.display = 'block';
   if (lim.trial) {
     document.getElementById('upgradeBox').style.display = 'block';
     const msg = document.getElementById('trialMsg');
@@ -658,22 +909,31 @@ function renderExerciseList(num, exs) {
   const list = document.getElementById('exList-' + num);
   if (!exs || !exs.length) { list.innerHTML = '<div style="padding:10px 14px;font-size:12px;color:var(--text3)">Sin ejercicios disponibles</div>'; return; }
   list.innerHTML = exs.map(ex => `
-    <div class="ex-item lv${ex.lv}" onclick="selectExercise(${ex.id}, ${num})" id="exItem-${ex.id}">
+    <div class="ex-item lv${ex.lv}${FAVORITES.has(String(ex.id)) ? ' faved' : ''}" onclick="selectExercise(${ex.id},${num})" id="exItem-${ex.id}">
       <div class="lv-dot"></div>
-      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${stripLatex(ex.type)}</span>
-    </div>
-  `).join('');
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${stripLatex(ex.type)}</span>
+      <span class="fav-icon" data-id="${ex.id}" onclick="toggleFavorite(${ex.id},${num},event)">${FAVORITES.has(String(ex.id)) ? '♥' : '♡'}</span>
+    </div>`).join('');
 }
 
 // ── SELECT EXERCISE ──
 function selectExercise(id, unitNum) {
-  // Load if not cached
   if (!exercises[unitNum]) return;
   const ex = exercises[unitNum].find(e => e.id === id);
   if (!ex) return;
   currentExercise = ex;
   chatMessages = [];
   currentStep = 0;
+  // Stats
+  if (!localStats.unitsWorked.has(unitNum)) {
+    localStats.unitsWorked.add(unitNum);
+    if (!USER.unitsWorked) USER.unitsWorked = [];
+    if (!USER.unitsWorked.includes(unitNum)) USER.unitsWorked.push(unitNum);
+  }
+  localStats.totalEx++;
+  USER.totalEx = Math.max(USER.totalEx || 0, localStats.totalEx);
+  // GA4
+  track('exercise_open', { exercise_id: id, unit: unitNum, level: ex.lv });
 
   // Active state
   document.querySelectorAll('.ex-item').forEach(el => el.classList.remove('active'));
@@ -711,10 +971,11 @@ function selectExercise(id, unitNum) {
     document.getElementById('progSteps').innerHTML = '';
   }
 
-  // Answer box
+  // Answer + export
   const ansBox = document.getElementById('ansBox');
   ansBox.classList.remove('show');
   ansBox.innerHTML = '';
+  document.getElementById('btnExport').style.display = 'none';
 
   // Clear chat
   document.getElementById('chatArea').innerHTML = '';
@@ -805,6 +1066,8 @@ async function sendMsg() {
     const resp = data.response || '';
     chatMessages.push({ role: 'assistant', content: resp });
     addBubble('ai', resp);
+    document.getElementById('btnExport').style.display = 'inline-block';
+    track('tutor_consulta', { exercise_id: currentExercise?.id, unit: currentExercise?.unidad });
 
     // Update restantes hint
     if (typeof data.restantes === 'number') {
@@ -905,7 +1168,10 @@ async function sendLibreMsg() {
 }
 
 // ── UPGRADE ──
-function showUpgradeModal() { document.getElementById('upgradeOverlay').classList.remove('hidden'); }
+function showUpgradeModal() {
+  document.getElementById('upgradeOverlay').classList.remove('hidden');
+  track('upgrade_modal_open');
+}
 function closeUpgrade() { document.getElementById('upgradeOverlay').classList.add('hidden'); }
 function selectPlan(plan, el) {
   selectedPlan = plan;
@@ -937,6 +1203,17 @@ if (TOKEN) {
   showAuthModal();
 }
 </script>
+
+<!-- PROGRESS MODAL -->
+<div class="overlay hidden" id="progressOverlay">
+  <div class="modal progress-modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div class="modal-title" style="margin:0">📊 Mi progreso</div>
+      <button onclick="closeProgressModal()" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div id="progressContent"></div>
+  </div>
+</div>
 
 <!-- WA_BUTTON -->
 <!-- CONTACT_EMAIL_BTN -->

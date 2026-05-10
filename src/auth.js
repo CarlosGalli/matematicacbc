@@ -332,6 +332,25 @@ function syncUserStats(userId, { totalEx, totalMinutes, unitsWorked }) {
   return { ok: true };
 }
 
+function getFavorites(userId) {
+  const db = readDB();
+  const user = db.users.find(u => u.id === userId);
+  if (!user) return { ok: false, error: 'Usuario no encontrado' };
+  return { ok: true, favorites: user.favorites || [] };
+}
+
+function toggleFavorite(userId, exerciseId) {
+  const db = readDB();
+  const user = db.users.find(u => u.id === userId);
+  if (!user) return { ok: false, error: 'Usuario no encontrado' };
+  if (!user.favorites) user.favorites = [];
+  const id = String(exerciseId);
+  const idx = user.favorites.indexOf(id);
+  if (idx === -1) { user.favorites.push(id); } else { user.favorites.splice(idx, 1); }
+  writeDB(db);
+  return { ok: true, favorites: user.favorites };
+}
+
 let _maintState = { active: false, mensaje: 'Estamos actualizando la plataforma. Volvé en unos minutos.' };
 function getMaintenance() { return _maintState; }
 function setMaintenance(active, mensaje) {
@@ -352,4 +371,5 @@ module.exports = {
   generateResetToken, resetPasswordWithToken,
   getMaintenance, setMaintenance,
   verifyEmailCode, resendVerificationCode,
+  getFavorites, toggleFavorite,
 };

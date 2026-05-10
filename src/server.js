@@ -336,6 +336,17 @@ app.post('/api/stats/sync', requireAuth, (req, res) => {
   res.json(auth.syncUserStats(req.user.id, { totalEx, totalMinutes, unitsWorked }));
 });
 
+// ─── FAVORITOS ────────────────────────────────────────────────
+app.get('/api/favorites', requireAuth, (req, res) => {
+  res.json(auth.getFavorites(req.user.id));
+});
+
+app.post('/api/favorites/toggle', requireAuth, (req, res) => {
+  const { exerciseId } = req.body;
+  if (!exerciseId) return res.status(400).json({ error: 'Falta exerciseId' });
+  res.json(auth.toggleFavorite(req.user.id, String(exerciseId)));
+});
+
 // ─── MERCADOPAGO ───────────────────────────────────────────────
 const MP_PRICES = {
   estandar: parseInt(process.env.MP_PRICE_ESTANDAR) || 15990,

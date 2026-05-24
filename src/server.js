@@ -28,6 +28,31 @@ console.log('[ADMIN] versión:', (ADMIN_HTML.match(/<title>(.*?)<\/title>/) || [
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '../data');
 const EX_DB_PATH = path.join(DATA_DIR, 'exercises_extra.json');
 
+// ─── Limpiar archivos stale de QuímicaCBC del volumen ─────────
+// Si el volumen tiene un /data/public/ con archivos del proyecto anterior,
+// los eliminamos para que el servidor siempre sirva desde el repo (/app/public/).
+(function cleanStaleVolumePublic() {
+  const dataPublicDir = path.join(DATA_DIR, 'public');
+  if (!fs.existsSync(dataPublicDir)) return;
+  const testFile = path.join(dataPublicDir, 'landing.html');
+  try {
+    if (fs.existsSync(testFile)) {
+      const content = fs.readFileSync(testFile, 'utf8');
+      if (content.includes('QuímicaCBC') || content.includes('QuimicaCBC') || content.includes('quimicacbc')) {
+        fs.rmSync(dataPublicDir, { recursive: true, force: true });
+        console.log('[BOOT] Eliminado DATA_DIR/public con archivos stale de QuímicaCBC');
+        return;
+      }
+    }
+    // El directorio existe pero no tiene landing.html reconocible — lo eliminamos igual
+    // para que no interfiera con el public/ del repo.
+    fs.rmSync(dataPublicDir, { recursive: true, force: true });
+    console.log('[BOOT] Eliminado DATA_DIR/public (directorio inesperado en volumen)');
+  } catch (e) {
+    console.error('[BOOT] No se pudo limpiar DATA_DIR/public:', e.message);
+  }
+}());
+
 function initExDB() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
   if (!fs.existsSync(EX_DB_PATH))

@@ -14,6 +14,7 @@ const crypto = require('crypto');
 
 const { buildSystemPrompt } = require('./prompts');
 const { UNITS, getExercises, getExercisesByUnit, getExerciseById } = require('./exercises-data');
+const { PARCIALES } = require('./parciales-data');
 const auth = require('./auth');
 const ADMIN_HTML = require('./admin-html');
 
@@ -294,6 +295,12 @@ app.get('/api/exercises/:unit', requireAuth, (req, res) => {
   const unit = parseInt(req.params.unit);
   const exercises = getUnitExercises(unit);
   res.json({ exercises });
+});
+
+app.get('/api/parciales/:tipo', requireAuth, (req, res) => {
+  const tipo = req.params.tipo;
+  if (!PARCIALES[tipo]) return res.status(400).json({ error: 'Tipo inválido' });
+  res.json({ parciales: PARCIALES[tipo] });
 });
 
 // ─── TUTOR IA ─────────────────────────────────────────────────

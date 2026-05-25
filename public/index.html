@@ -231,6 +231,15 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear
 /* ── EXPORT ── */
 .btn-export{background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;transition:.2s;white-space:nowrap;}
 .btn-export:hover{border-color:var(--naranja);color:var(--naranja);}
+/* ── PARCIALES ── */
+.parcial-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;max-width:900px;}
+.parcial-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:10px;}
+.parcial-card-title{font-size:14px;font-weight:700;color:var(--text);}
+.parcial-card-temas{font-size:12px;color:var(--text2);line-height:1.5;}
+.parcial-card-footer{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;}
+.badge-resuelto{font-size:11px;font-weight:700;padding:2px 10px;border-radius:99px;background:rgba(63,185,80,.15);color:var(--verde);}
+.btn-pdf{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text2);transition:.2s;text-decoration:none;display:inline-block;}
+.btn-pdf:hover{border-color:var(--naranja);color:var(--naranja);}
 </style>
 </head>
 <body>
@@ -296,13 +305,9 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear
       <p>Elegí una unidad y un ejercicio para empezar a practicar con el tutor IA.</p>
     </div>
 
-    <!-- Panel parcial vacío -->
-    <div id="parcialArea" style="display:none;flex:1;align-items:center;justify-content:center;">
-      <div style="text-align:center;color:var(--text3);">
-        <div style="font-size:48px;margin-bottom:12px;opacity:.4">📋</div>
-        <p style="font-size:16px;font-weight:600;margin-bottom:6px;color:var(--text2)">No hay parciales cargados aún</p>
-        <p style="font-size:14px;">Próximamente</p>
-      </div>
+    <!-- Panel parciales -->
+    <div id="parcialArea" style="display:none;flex:1;flex-direction:column;overflow-y:auto;padding:24px 28px;">
+      <div id="parcialGrid" class="parcial-grid"></div>
     </div>
 
     <!-- Panel de ejercicio (oculto hasta seleccionar) -->
@@ -865,8 +870,37 @@ function setTab(tab, btn) {
     document.getElementById('emptyState').style.display = 'none';
     document.getElementById('exerciseArea').style.display = 'none';
     document.getElementById('libreArea').style.display = 'none';
+    loadParciales(tab);
   } else {
     if (!currentExercise) document.getElementById('emptyState').style.display = 'flex';
+  }
+}
+
+async function loadParciales(tipo) {
+  const grid = document.getElementById('parcialGrid');
+  grid.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0">Cargando...</div>';
+  try {
+    const data = await api('/api/parciales/' + tipo);
+    const parciales = data.parciales || [];
+    if (!parciales.length) {
+      grid.innerHTML = `<div style="color:var(--text3);text-align:center;padding:60px 0">
+        <div style="font-size:48px;margin-bottom:12px;opacity:.4">📋</div>
+        <p style="font-size:16px;font-weight:600;margin-bottom:6px;color:var(--text2)">No hay parciales cargados aún</p>
+        <p style="font-size:14px;">Próximamente</p></div>`;
+      return;
+    }
+    grid.innerHTML = parciales.map(p => `
+      <div class="parcial-card">
+        <div class="parcial-card-title">${p.titulo}</div>
+        <div class="parcial-card-temas">${p.temas}</div>
+        <div class="parcial-card-footer">
+          ${p.resuelto ? '<span class="badge-resuelto">✓ Resuelto</span>' : ''}
+          <a href="${p.archivo}" target="_blank" rel="noopener" class="btn-pdf">Ver PDF</a>
+          <a href="${p.archivo}" download class="btn-pdf">Descargar</a>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    grid.innerHTML = `<div style="color:var(--rojo);font-size:13px">${e.message}</div>`;
   }
 }
 

@@ -4,8 +4,8 @@ const PARCIALES = {
     {
       id: 'p1_2025_ej1234',
       titulo: 'Parcial 1°C 2025 — Ejercicios 1 a 4',
-      temas: 'Intersecciones, ceros, positividad, composición, asíntotas, trigonometría',
-      archivo: '/parciales/p1/MatematicaCBC_Parcial1_2025_intersecciones-y-asintotas_ejercicios1-2-3-4_Resuelto_v1.pdf',
+      temas: 'Intersecciones, ceros y positividad, composición y asíntotas, trigonometría',
+      archivo: '/parciales/p1/MatematicaCBC_Parcial1_2025_Resuelto_v2.pdf',
       anio: 2025,
       resuelto: true
     }

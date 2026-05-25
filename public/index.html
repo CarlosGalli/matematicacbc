@@ -250,7 +250,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear
 
 <!-- TABS -->
 <div class="tabs-nav">
-  <button class="tab-btn act" onclick="setTab('p1',this)">Parcial 1°C</button>
+  <button class="tab-btn act" onclick="setTab('guia',this)">Guía</button>
+  <button class="tab-btn" onclick="setTab('p1',this)">Parcial 1°C</button>
   <button class="tab-btn" onclick="setTab('p2',this)">Parcial 2°C</button>
 </div>
 
@@ -293,6 +294,15 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear
       <div class="sym">∑</div>
       <p style="font-size:16px;font-weight:600;margin-bottom:6px">Bienvenido/a a MatemáticaCBC</p>
       <p>Elegí una unidad y un ejercicio para empezar a practicar con el tutor IA.</p>
+    </div>
+
+    <!-- Panel parcial vacío -->
+    <div id="parcialArea" style="display:none;flex:1;align-items:center;justify-content:center;">
+      <div style="text-align:center;color:var(--text3);">
+        <div style="font-size:48px;margin-bottom:12px;opacity:.4">📋</div>
+        <p style="font-size:16px;font-weight:600;margin-bottom:6px;color:var(--text2)">No hay parciales cargados aún</p>
+        <p style="font-size:14px;">Próximamente</p>
+      </div>
     </div>
 
     <!-- Panel de ejercicio (oculto hasta seleccionar) -->
@@ -844,13 +854,20 @@ async function exportPDF() {
   track('export_pdf', { exercise_id: currentExercise.id });
 }
 
-const PARCIAL_UNITS = { p1: [1,2,3], p2: [4,5,6] };
-let currentTab = 'p1';
+let currentTab = 'guia';
 function setTab(tab, btn) {
   currentTab = tab;
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('act'));
   btn.classList.add('act');
-  renderUnitList();
+  const isParcial = tab === 'p1' || tab === 'p2';
+  document.getElementById('parcialArea').style.display = isParcial ? 'flex' : 'none';
+  if (isParcial) {
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('exerciseArea').style.display = 'none';
+    document.getElementById('libreArea').style.display = 'none';
+  } else {
+    if (!currentExercise) document.getElementById('emptyState').style.display = 'flex';
+  }
 }
 
 function updateTopbar() {
@@ -906,11 +923,8 @@ async function loadUnits() {
 }
 
 function renderUnitList() {
-  const allowed = PARCIAL_UNITS[currentTab];
   const container = document.getElementById('unitsList');
-  container.innerHTML = Object.entries(units)
-    .filter(([num]) => allowed.includes(parseInt(num)))
-    .map(([num, unit]) => `
+  container.innerHTML = Object.entries(units).map(([num, unit]) => `
     <div class="unit-item">
       <button class="unit-toggle" onclick="toggleUnit(${num}, this)">
         <span>${num}. ${unit.nombre}</span>

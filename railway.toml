@@ -5,3 +5,7 @@ builder = "nixpacks"
 startCommand = "node src/server.js"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
+
+[[volumes]]
+mountPath = "/data"
+name = "matematicacbc-data"

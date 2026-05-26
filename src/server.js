@@ -26,7 +26,7 @@ const anthropic = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY 
 console.log('[ADMIN] versión:', (ADMIN_HTML.match(/<title>(.*?)<\/title>/) || [])[1]);
 
 // ─── DB ejercicios dinámicos (admin puede agregar/borrar) ──────
-const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '../data');
+const DATA_DIR = process.env.DATA_DIR || '/data';
 const EX_DB_PATH = path.join(DATA_DIR, 'exercises_extra.json');
 
 // ─── Limpiar archivos stale de QuímicaCBC del volumen ─────────

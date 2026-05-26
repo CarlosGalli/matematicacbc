@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 
 const BCRYPT_ROUNDS = 12;
-const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '../data');
+const DATA_DIR = process.env.DATA_DIR || '/data';
 const DB_PATH = path.join(DATA_DIR, 'users.json');
 const ATTEMPTS_PATH = path.join(DATA_DIR, 'login_attempts.json');
 const MAX_ATTEMPTS = 5;
